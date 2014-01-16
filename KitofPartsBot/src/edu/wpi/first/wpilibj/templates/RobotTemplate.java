@@ -63,7 +63,7 @@ public class RobotTemplate extends IterativeRobot {
         LeftMotor_2.set(-stick.getRawAxis(2));
         RightMotor_1.set(stick.getRawAxis(2));
         RightMotor_2.set(stick.getRawAxis(2));
-        putTeleopData();
+        SDD.putTeleopData(LeftMotor_1, LeftMotor_2, RightMotor_1,RightMotor_2, LeftEncoder, RightEncoder);
     }
     
     /**
@@ -73,7 +73,7 @@ public class RobotTemplate extends IterativeRobot {
     
     }
     
-     public void putTeleopData() {
+    /* public void putTeleopData() {
         SmartDashboard.putNumber("Left Motor 1", LeftMotor_1.get());
         SmartDashboard.putNumber("Left Motor 2", LeftMotor_2.get());
         SmartDashboard.putNumber("Right Motor 1", RightMotor_1.get());
@@ -81,5 +81,5 @@ public class RobotTemplate extends IterativeRobot {
         SmartDashboard.putNumber("Left Encoder", LeftEncoder.getDistance());
         SmartDashboard.putNumber("Right Encoder", RightEncoder.getDistance());
     }
-     
+     */
 }

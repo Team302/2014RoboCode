@@ -6,6 +6,8 @@
 
 package edu.wpi.first.wpilibj.templates;
 
+import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -15,13 +17,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class SmartDashboardData {
 
     
-  /* public void putTeleopData() {
-        SmartDashboard.putNumber("Left Motor 1", LeftMotor_1.get());
-        SmartDashboard.putNumber("Left Motor 2", LeftMotor_2.get());
-        SmartDashboard.putNumber("Right Motor 1", RightMotor_1.get());
-        SmartDashboard.putNumber("Right Motor 2", RightMotor_2.get());
+   public void putTeleopData(Victor LeftMotor1, Victor LeftMotor2, Victor RightMotor1, Victor RightMotor2, Encoder LeftEncoder, Encoder RightEncoder) {
+        SmartDashboard.putNumber("Left Motor 1", LeftMotor1.get());
+        SmartDashboard.putNumber("Left Motor 2", LeftMotor2.get());
+        SmartDashboard.putNumber("Right Motor 1", RightMotor1.get());
+        SmartDashboard.putNumber("Right Motor 2", RightMotor2.get());
         SmartDashboard.putNumber("Left Encoder", LeftEncoder.getDistance());
         SmartDashboard.putNumber("Right Encoder", RightEncoder.getDistance());
    }
-   */
+   
 }
