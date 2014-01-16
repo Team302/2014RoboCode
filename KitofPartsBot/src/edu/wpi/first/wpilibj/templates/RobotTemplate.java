@@ -11,8 +11,8 @@ package edu.wpi.first.wpilibj.templates;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.Victor;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -27,7 +27,7 @@ public class RobotTemplate extends IterativeRobot {
      * used for any initialization code.
      */ 
     
-    public Victor LeftMotor_1;
+    Victor LeftMotor_1;
     Victor LeftMotor_2;
     Victor RightMotor_1;
     Victor RightMotor_2;
@@ -35,7 +35,8 @@ public class RobotTemplate extends IterativeRobot {
     Encoder LeftEncoder;
     Encoder RightEncoder;
     SmartDashboardData SDD = new SmartDashboardData();
-        
+    PIDController AutonomousMobility;
+    
     public void robotInit() {
        LeftMotor_1 = new Victor(1);
        LeftMotor_2 = new Victor(2);
@@ -46,13 +47,22 @@ public class RobotTemplate extends IterativeRobot {
        RightEncoder = new Encoder(1,2);
        LeftEncoder.start();
        RightEncoder.start();
+       LeftEncoder.setReverseDirection(true);
+       RightEncoder.setReverseDirection(true);
+       LeftEncoder.setDistancePerPulse(28);
+       RightEncoder.setDistancePerPulse(28);
     }
 
+    
+    public void autonomousInit() {
+        AutonomousMobility = new PIDController(1, 0, 0, LeftEncoder, LeftMotor_1);
+    }
+    
     /**
      * This function is called periodically during autonomous
      */
     public void autonomousPeriodic() {
-
+        AutonomousMobility.setSetpoint(120);
     }
 
     /**
