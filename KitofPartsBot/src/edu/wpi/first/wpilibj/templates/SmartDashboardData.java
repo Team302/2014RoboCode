@@ -22,8 +22,8 @@ public class SmartDashboardData {
         SmartDashboard.putNumber("Left Motor 2", LeftMotor2.get());
         SmartDashboard.putNumber("Right Motor 1", RightMotor1.get());
         SmartDashboard.putNumber("Right Motor 2", RightMotor2.get());
-        SmartDashboard.putNumber("Left Encoder", LeftEncoder.getRate());
-        SmartDashboard.putNumber("Right Encoder", RightEncoder.getRate());
+        SmartDashboard.putNumber("Left Encoder", LeftEncoder.getDistance());
+        SmartDashboard.putNumber("Right Encoder", RightEncoder.getDistance());
    }
    
 }

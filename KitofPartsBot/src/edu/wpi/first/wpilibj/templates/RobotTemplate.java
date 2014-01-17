@@ -49,8 +49,8 @@ public class RobotTemplate extends IterativeRobot {
        RightEncoder.start();
        LeftEncoder.setReverseDirection(true);
        RightEncoder.setReverseDirection(true);
-       LeftEncoder.setDistancePerPulse(28);
-       RightEncoder.setDistancePerPulse(28);
+       //LeftEncoder.setDistancePerPulse(1/28);
+       //RightEncoder.setDistancePerPulse(1/28);
     }
 
     
@@ -71,8 +71,8 @@ public class RobotTemplate extends IterativeRobot {
     public void teleopPeriodic() {
         LeftMotor_1.set(-stick.getRawAxis(2));
         LeftMotor_2.set(-stick.getRawAxis(2));
-        RightMotor_1.set(stick.getRawAxis(2));
-        RightMotor_2.set(stick.getRawAxis(2));
+        RightMotor_1.set(-stick.getRawAxis(2));
+        RightMotor_2.set(-stick.getRawAxis(2));
         SDD.putTeleopData(LeftMotor_1, LeftMotor_2, RightMotor_1,RightMotor_2, LeftEncoder, RightEncoder);
     }
     
