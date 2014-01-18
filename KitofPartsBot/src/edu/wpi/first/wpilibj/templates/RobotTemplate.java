@@ -46,7 +46,7 @@ public class RobotTemplate extends IterativeRobot {
        RightMotor_2 = new Victor(4);
        stick = new Joystick(1);
        LeftEncoder = new Encoder(10,11);
-       RightEncoder = new Encoder(1,2);
+       RightEncoder = new Encoder(3,4);
        LeftEncoder.start();
        RightEncoder.start();
        //LeftEncoder.setReverseDirection(true);
@@ -66,14 +66,14 @@ public class RobotTemplate extends IterativeRobot {
      */
     public void autonomousPeriodic() {
         
-        if(LeftEncoder.getDistance() > -3360 && RightEncoder.getDistance() > -3360){
+        if(LeftEncoder.getDistance() < 3360 && RightEncoder.getDistance() < 3360){
             if(((LeftEncoder.getRate()-1329)/1329 + 0.3)/2 > 0.99) {
                 LeftMotor_1.set(0.99);
-            } else LeftMotor_1.set(0.0 * -(LeftEncoder.getRate()+1329)/-1329 + 0.3);
+            } else LeftMotor_1.set(0.15 * -(LeftEncoder.getRate()-1329)/1329 + 0.3);
             LeftMotor_2.set(LeftMotor_1.get());
             if(((RightEncoder.getRate()-1431)/1431 + 0.3)/2 > 0.99){
                 RightMotor_1.set(0.99);
-            } else RightMotor_1.set(0.0 * (RightEncoder.getRate()+1329)/-1329 - 0.3);
+            } else RightMotor_1.set(0.15 * (RightEncoder.getRate()-1329)/1329 - 0.3);
             RightMotor_2.set(RightMotor_1.get());
         } else {
             LeftMotor_1.set(-0);
@@ -95,12 +95,12 @@ public class RobotTemplate extends IterativeRobot {
         if(Math.abs(stick.getRawAxis(2)) < 0.03){
             LeftMotor_2.set(0);
         } else LeftMotor_2.set(-stick.getRawAxis(2));
-        if(Math.abs(stick.getRawAxis(2)) < 0.03){
+        if(Math.abs(stick.getRawAxis(4)) < 0.03){
             RightMotor_1.set(0);
-        } else RightMotor_1.set(stick.getRawAxis(2));
-        if(Math.abs(stick.getRawAxis(2)) < 0.03){
+        } else RightMotor_1.set(stick.getRawAxis(4));
+        if(Math.abs(stick.getRawAxis(4)) < 0.03){
             RightMotor_2.set(0);
-        } else RightMotor_2.set(stick.getRawAxis(2));
+        } else RightMotor_2.set(stick.getRawAxis(4));
         SDD.putTeleopData(LeftMotor_1, LeftMotor_2, RightMotor_1,RightMotor_2, LeftEncoder, RightEncoder);
     }
     
