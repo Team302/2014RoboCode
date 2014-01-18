@@ -78,7 +78,7 @@ public class RobotTemplate extends IterativeRobot {
      * This function is called periodically during autonomous
      */
     public void autonomousPeriodic() {
-        AutonomousMobilityLeft.setSetpoint(3360);
+        /*AutonomousMobilityLeft.setSetpoint(3360);
         AutonomousMobilityRight.setSetpoint(3360);
         if(LeftEncoder.getDistance() < 3360 && RightEncoder.getDistance() < 3360){
             if(AutonomousMobilityLeft.get() + 0.3 > 0.99){
@@ -97,7 +97,7 @@ public class RobotTemplate extends IterativeRobot {
         }
         
         SDD.putTeleopData(LeftMotor_1, LeftMotor_2, RightMotor_1,RightMotor_2, LeftEncoder, RightEncoder, AutonomousMobilityLeft);
-    }
+    */}
 
     /**
      * This function is called periodically during operator control
