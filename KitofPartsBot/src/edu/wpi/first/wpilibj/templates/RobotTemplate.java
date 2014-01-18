@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.Victor;
 
 /**
@@ -35,7 +36,8 @@ public class RobotTemplate extends IterativeRobot {
     Encoder LeftEncoder;
     Encoder RightEncoder;
     SmartDashboardData SDD = new SmartDashboardData();
-    PIDController AutonomousMobility;
+    PIDController AutonomousMobilityLeft;
+    PIDController AutonomousMobilityRight;
     
     public void robotInit() {
        LeftMotor_1 = new Victor(1);
@@ -55,16 +57,46 @@ public class RobotTemplate extends IterativeRobot {
 
     
     public void autonomousInit() {
-        //AutonomousMobility.enable();
-        //AutonomousMobility = new PIDController(1, 0, 0, LeftEncoder, LeftMotor_1);
+        /*PIDOutput LeftPID;
+        PIDOutput RightPID;
+        AutonomousMobilityLeft = new PIDController(1, 0, 0, LeftEncoder, LeftPID = new PIDOutput() {
+            public void pidWrite(double output){
+                
+            }
+        });
+        AutonomousMobilityRight = new PIDController(1, 0, 0, RightEncoder, RightPID = new PIDOutput() {
+            public void pidWrite(double output){
+                
+            }
+        });
+        AutonomousMobilityLeft.enable();
+        AutonomousMobilityRight.enable();
+        */
     }
     
     /**
      * This function is called periodically during autonomous
      */
     public void autonomousPeriodic() {
-        //AutonomousMobility.setSetpoint(120*28);
-        SDD.putTeleopData(LeftMotor_1, LeftMotor_2, RightMotor_1,RightMotor_2, LeftEncoder, RightEncoder);
+        AutonomousMobilityLeft.setSetpoint(3360);
+        AutonomousMobilityRight.setSetpoint(3360);
+        if(LeftEncoder.getDistance() < 3360 && RightEncoder.getDistance() < 3360){
+            if(AutonomousMobilityLeft.get() + 0.3 > 0.99){
+                LeftMotor_1.set(0.99);
+            } else LeftMotor_1.set(AutonomousMobilityLeft.get() + 0.3);
+            LeftMotor_2.set(LeftMotor_1.get());
+            if(-AutonomousMobilityRight.get() + -0.3 < -0.99) {
+                RightMotor_1.set(-0.99);
+            } else RightMotor_2.set(-AutonomousMobilityRight.get() + -0.3);
+            RightMotor_2.set(RightMotor_1.get());
+        } else {
+            LeftMotor_1.set(-0);
+            LeftMotor_2.set(-0);
+            RightMotor_1.set(0);
+            RightMotor_2.set(0);
+        }
+        
+        SDD.putTeleopData(LeftMotor_1, LeftMotor_2, RightMotor_1,RightMotor_2, LeftEncoder, RightEncoder, AutonomousMobilityLeft);
     }
 
     /**
@@ -83,7 +115,7 @@ public class RobotTemplate extends IterativeRobot {
         if(Math.abs(stick.getRawAxis(2)) < 0.03){
             RightMotor_2.set(0);
         } else RightMotor_2.set(stick.getRawAxis(2));
-        SDD.putTeleopData(LeftMotor_1, LeftMotor_2, RightMotor_1,RightMotor_2, LeftEncoder, RightEncoder);
+        SDD.putTeleopData(LeftMotor_1, LeftMotor_2, RightMotor_1,RightMotor_2, LeftEncoder, RightEncoder, AutonomousMobilityLeft);
     }
     
     /**
