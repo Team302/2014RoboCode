@@ -55,24 +55,34 @@ public class RobotTemplate extends IterativeRobot {
 
     
     public void autonomousInit() {
-        AutonomousMobility = new PIDController(1, 0, 0, LeftEncoder, LeftMotor_1);
+        //AutonomousMobility.enable();
+        //AutonomousMobility = new PIDController(1, 0, 0, LeftEncoder, LeftMotor_1);
     }
     
     /**
      * This function is called periodically during autonomous
      */
     public void autonomousPeriodic() {
-        AutonomousMobility.setSetpoint(120);
+        //AutonomousMobility.setSetpoint(120*28);
+        SDD.putTeleopData(LeftMotor_1, LeftMotor_2, RightMotor_1,RightMotor_2, LeftEncoder, RightEncoder);
     }
 
     /**
      * This function is called periodically during operator control
      */
     public void teleopPeriodic() {
-        LeftMotor_1.set(-stick.getRawAxis(2));
-        LeftMotor_2.set(-stick.getRawAxis(2));
-        RightMotor_1.set(-stick.getRawAxis(2));
-        RightMotor_2.set(-stick.getRawAxis(2));
+        if(Math.abs(stick.getRawAxis(2)) < 0.03){
+            LeftMotor_1.set(0);
+        } else LeftMotor_1.set(-stick.getRawAxis(2));
+        if(Math.abs(stick.getRawAxis(2)) < 0.03){
+            LeftMotor_2.set(0);
+        } else LeftMotor_2.set(-stick.getRawAxis(2));
+        if(Math.abs(stick.getRawAxis(2)) < 0.03){
+            RightMotor_1.set(0);
+        } else RightMotor_1.set(stick.getRawAxis(2));
+        if(Math.abs(stick.getRawAxis(2)) < 0.03){
+            RightMotor_2.set(0);
+        } else RightMotor_2.set(stick.getRawAxis(2));
         SDD.putTeleopData(LeftMotor_1, LeftMotor_2, RightMotor_1,RightMotor_2, LeftEncoder, RightEncoder);
     }
     
