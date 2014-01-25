@@ -27,7 +27,7 @@ public class SmartDashboardData {
         SmartDashboard.putNumber("Right Encoder", RightEncoder.getDistance());
         SmartDashboard.putNumber("Left Encoder Rate", LeftEncoder.getRate());
         SmartDashboard.putNumber("Right Encoder Rate", RightEncoder.getRate());
-        //SmartDashboard.putNumber("PID Thingy Left", LeftController.get());
+        SmartDashboard.putNumber("PID Thingy Left", LeftController.get());
    }
    
 }
