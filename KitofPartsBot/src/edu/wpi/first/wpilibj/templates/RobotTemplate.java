@@ -40,7 +40,16 @@ public class RobotTemplate extends IterativeRobot {
     double TargetRateR;
     double LeftCmd;
     double RightCmd;
+    
     int AutonMode;
+    final int FORWARD_1 = 1;
+    final int SHOOT_1 = 2;
+    final int BACKWARD_1 = 3;
+    final int TURN_RIGHT_90 = 4;
+    final int COLLECT_BALL = 5;
+    final int TURN_LEFT_90 = 6;
+    final int FORWARD_2 = 7;
+    final int SHOOT_2 = 8;
     
     
     public void robotInit() {
@@ -62,9 +71,11 @@ public class RobotTemplate extends IterativeRobot {
     public void autonomousInit() {
         LeftEncoder.reset();
         RightEncoder.reset();
+        
         IsTargetDistance = false;
         TargetRateL = TargetRateR = 47.46428571428571;
-        AutonMode = 1;
+        
+        AutonMode = FORWARD_1;
         LeftCmd = 0;
         RightCmd = 0;
     }
@@ -80,7 +91,7 @@ public class RobotTemplate extends IterativeRobot {
         
         
         switch(AutonMode){
-            case 1: {
+            case FORWARD_1: {
             if (LeftEncoder.getDistance() < 12 || RightEncoder.getDistance() < 12) {
                 if ((PrateL + 0.3) > 0.99) {
                     LeftCmd = 0.99;
@@ -90,13 +101,8 @@ public class RobotTemplate extends IterativeRobot {
                 if ((PrateR + 0.3) > 0.99) {
                     RightCmd = 0.99;
                 } else {
-                    RightCmd = -(0.15 * PrateR + 0.3);
+                    RightCmd = (0.15 * PrateR + 0.3);
                 }
-                
-                LeftMotor_1.set(LeftCmd);
-                LeftMotor_2.set(LeftCmd);
-                RightMotor_1.set(RightCmd);
-                RightMotor_2.set(RightCmd);
                 break;
             } else {
                 LeftCmd = 0;
@@ -108,18 +114,18 @@ public class RobotTemplate extends IterativeRobot {
                 TargetRateL = 47.46428571428571;
                 TargetRateR = -47.46428571428571;
                 
-                AutonMode = 2;
+                AutonMode = TURN_RIGHT_90;
                 break;
                 } 
             }
-            case 2: {
+            case TURN_RIGHT_90: {
                 if(LeftEncoder.getDistance() < 16.10066235){
                     LeftCmd = (0.15 * PrateL + 0.3);
                 } else {
                     LeftCmd = 0;
                 }
                 if(RightEncoder.getDistance() > -16.10066235) {
-                    RightCmd = (0.15 * PrateR + 0.3);
+                    RightCmd = -(0.15 * PrateR + 0.3);
                 } else {
                     RightCmd = 0;
                 } 
@@ -146,7 +152,7 @@ public class RobotTemplate extends IterativeRobot {
         } else LeftCmd = -stick.getRawAxis(2);
         if(stick.getRawAxis(4) < 0.03 && stick.getRawAxis(4) > -0.03) {
             RightCmd = 0;
-        } else RightCmd = stick.getRawAxis(4);
+        } else RightCmd = -stick.getRawAxis(4);
         
         drive(LeftCmd, RightCmd);
         
@@ -163,18 +169,8 @@ public class RobotTemplate extends IterativeRobot {
     public void drive(double leftspeed, double rightspeed){
         LeftMotor_1.set(leftspeed);
         LeftMotor_2.set(leftspeed);
-        RightMotor_1.set(rightspeed);
-        RightMotor_2.set(rightspeed);
+        RightMotor_1.set(-rightspeed);
+        RightMotor_2.set(-rightspeed);
     }
-    
-    /* public void putTeleopData() {
-     SmartDashboard.putNumber("Left Motor 1", LeftMotor_1.get());
-     SmartDashboard.putNumber("Left Motor 2", LeftMotor_2.get());
-     SmartDashboard.putNumber("Right Motor 1", RightMotor_1.get());
-     SmartDashboard.putNumber("Right Motor 2", RightMotor_2.get());
-     SmartDashboard.putNumber("Left Encoder", LeftEncoder.getDistance());
-     SmartDashboard.putNumber("Right Encoder", RightEncoder.getDistance());
-     }
-     */
     
 }
