@@ -18,7 +18,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class SmartDashboardData {
 
     
-   public void putTeleopData(Victor LeftMotor1, Victor LeftMotor2, Victor RightMotor1, Victor RightMotor2, Encoder LeftEncoder, Encoder RightEncoder) {
+   public void putSDData(Victor LeftMotor1, Victor LeftMotor2, Victor RightMotor1, Victor RightMotor2, Encoder LeftEncoder, Encoder RightEncoder) {
         SmartDashboard.putNumber("Left Motor 1", LeftMotor1.get());
         SmartDashboard.putNumber("Left Motor 2", LeftMotor2.get());
         SmartDashboard.putNumber("Right Motor 1", RightMotor1.get());
