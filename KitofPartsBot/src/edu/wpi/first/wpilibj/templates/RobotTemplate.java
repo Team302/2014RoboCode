@@ -167,6 +167,13 @@ public class RobotTemplate extends IterativeRobot {
         RightMotor_2.set(rightspeed);
     }
 
+    public void drive(double leftspeed, double rightspeed){
+        LeftMotor_1.set(leftspeed);
+        LeftMotor_2.set(leftspeed);
+        RightMotor_1.set(rightspeed);
+        RightMotor_2.set(rightspeed);
+    }
+
     /* public void putTeleopData() {
      SmartDashboard.putNumber("Left Motor 1", LeftMotor_1.get());
      SmartDashboard.putNumber("Left Motor 2", LeftMotor_2.get());
