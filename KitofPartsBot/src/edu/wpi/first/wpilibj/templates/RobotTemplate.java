@@ -33,12 +33,13 @@ public class RobotTemplate extends IterativeRobot {
     Joystick stick;
     Encoder LeftEncoder;
     Encoder RightEncoder;
-    SmartDashboardData SDD = new SmartDashboardData();
-    PIDController AutonomousMobilityLeft;
-    PIDController AutonomousMobilityRight;
+    SmartDashboardData SDD;
+    
     boolean IsTargetDistance;
     double TargetRateL;
     double TargetRateR;
+    double LeftCmd;
+    double RightCmd;
     int AutonMode;
     
     
@@ -50,6 +51,8 @@ public class RobotTemplate extends IterativeRobot {
         stick = new Joystick(1);
         LeftEncoder = new Encoder(10, 11);
         RightEncoder = new Encoder(3, 4);
+        SDD = new SmartDashboardData();
+        
         LeftEncoder.setDistancePerPulse(0.0357142857142857);
         RightEncoder.setDistancePerPulse(0.0357142857142857);
         LeftEncoder.start();
@@ -62,6 +65,8 @@ public class RobotTemplate extends IterativeRobot {
         IsTargetDistance = false;
         TargetRateL = TargetRateR = 47.46428571428571;
         AutonMode = 1;
+        LeftCmd = 0;
+        RightCmd = 0;
     }
 
     /**
@@ -69,8 +74,8 @@ public class RobotTemplate extends IterativeRobot {
      */
     public void autonomousPeriodic() {
         
-        double PrateL = (LeftEncoder.getRate() - TargetRateL) / TargetRateL;
-        double PrateR = (RightEncoder.getRate() - TargetRateR) / TargetRateR;
+        double PrateL = (TargetRateL - LeftEncoder.getRate()) / TargetRateL;
+        double PrateR = (TargetRateR - RightEncoder.getRate()) / TargetRateR;
         double DeltaDistance = LeftEncoder.getDistance()- RightEncoder.getDistance();
         
         
@@ -78,77 +83,74 @@ public class RobotTemplate extends IterativeRobot {
             case 1: {
             if (LeftEncoder.getDistance() < 12 || RightEncoder.getDistance() < 12) {
                 if ((PrateL + 0.3) > 0.99) {
-                    LeftMotor_1.set(0.99);
+                    LeftCmd = 0.99;
                 } else {
-                    LeftMotor_1.set(-(0.15 * PrateL - 0.3));
+                    LeftCmd = (0.15 * PrateL + 0.3);
                 }
-                LeftMotor_2.set(LeftMotor_1.get());
                 if ((PrateR + 0.3) > 0.99) {
-                    RightMotor_1.set(0.99);
+                    RightCmd = 0.99;
                 } else {
-                    RightMotor_1.set(0.15 * PrateR - 0.3);
+                    RightCmd = -(0.15 * PrateR + 0.3);
                 }
-                RightMotor_2.set(RightMotor_1.get());
+                
+                LeftMotor_1.set(LeftCmd);
+                LeftMotor_2.set(LeftCmd);
+                RightMotor_1.set(RightCmd);
+                RightMotor_2.set(RightCmd);
                 break;
             } else {
-                LeftMotor_1.set(0);
-                LeftMotor_2.set(0);
-                RightMotor_1.set(0);
-                RightMotor_2.set(0);
+                LeftCmd = 0;
+                RightCmd = 0;
+                
                 LeftEncoder.reset();
                 RightEncoder.reset();
+                
                 TargetRateL = 47.46428571428571;
                 TargetRateR = -47.46428571428571;
+                
                 AutonMode = 2;
                 break;
                 } 
             }
             case 2: {
-                if(LeftEncoder.getDistance() < 16.10066235 && RightEncoder.getDistance() > -16.10066235){
-                    LeftMotor_1.set(0.15 * -PrateL + 0.3);
-                    LeftMotor_2.set(LeftMotor_1.get());
+                if(LeftEncoder.getDistance() < 16.10066235){
+                    LeftCmd = (0.15 * PrateL + 0.3);
                 } else {
-                    LeftMotor_1.set(0);
-                    LeftMotor_2.set(0);
+                    LeftCmd = 0;
                 }
                 if(RightEncoder.getDistance() > -16.10066235) {
-                RightMotor_1.set(0.15 * -PrateR + 0.3);
-                RightMotor_2.set(RightMotor_1.get());
+                    RightCmd = (0.15 * PrateR + 0.3);
                 } else {
-                    RightMotor_1.set(0);
-                    RightMotor_2.set(0);
+                    RightCmd = 0;
                 } 
                 break;
             }
+            default: {
+                LeftCmd = 0;
+                RightCmd = 0;
+                break;
+            }
         }
-        SDD.putTeleopData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder);
+        
+        drive(LeftCmd, RightCmd);
+        
+        SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder);
     }
 
     /**
      * This function is called periodically during operator control
      */
     public void teleopPeriodic() {
-        if (Math.abs(stick.getRawAxis(2)) < 0.03) {
-            LeftMotor_1.set(0);
-        } else {
-            LeftMotor_1.set(-stick.getRawAxis(2));
-        }
-        if (Math.abs(stick.getRawAxis(2)) < 0.03) {
-            LeftMotor_2.set(0);
-        } else {
-            LeftMotor_2.set(-stick.getRawAxis(2));
-        }
-        if (Math.abs(stick.getRawAxis(4)) < 0.03) {
-            RightMotor_1.set(0);
-        } else {
-            RightMotor_1.set(stick.getRawAxis(4));
-        }
-        if (Math.abs(stick.getRawAxis(4)) < 0.03) {
-            RightMotor_2.set(0);
-        } else {
-            RightMotor_2.set(stick.getRawAxis(4));
-        }
-        SDD.putTeleopData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder);
+        if(stick.getRawAxis(2) < 0.03 && stick.getRawAxis(2) > -0.03){
+            LeftCmd = 0;
+        } else LeftCmd = -stick.getRawAxis(2);
+        if(stick.getRawAxis(4) < 0.03 && stick.getRawAxis(4) > -0.03) {
+            RightCmd = 0;
+        } else RightCmd = stick.getRawAxis(4);
+        
+        drive(LeftCmd, RightCmd);
+        
+        SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder);
     }
 
     /**
@@ -158,6 +160,13 @@ public class RobotTemplate extends IterativeRobot {
 
     }
 
+    public void drive(double leftspeed, double rightspeed){
+        LeftMotor_1.set(leftspeed);
+        LeftMotor_2.set(leftspeed);
+        RightMotor_1.set(rightspeed);
+        RightMotor_2.set(rightspeed);
+    }
+    
     /* public void putTeleopData() {
      SmartDashboard.putNumber("Left Motor 1", LeftMotor_1.get());
      SmartDashboard.putNumber("Left Motor 2", LeftMotor_2.get());
@@ -167,4 +176,5 @@ public class RobotTemplate extends IterativeRobot {
      SmartDashboard.putNumber("Right Encoder", RightEncoder.getDistance());
      }
      */
+    
 }
