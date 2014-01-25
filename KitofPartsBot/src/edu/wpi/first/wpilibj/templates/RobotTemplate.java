@@ -41,6 +41,8 @@ public class RobotTemplate extends IterativeRobot {
     double LeftCmd;
     double RightCmd;
     int AutonMode;
+    double Speed;
+    double Turn;
     
     
     public void robotInit() {
@@ -141,7 +143,7 @@ public class RobotTemplate extends IterativeRobot {
      * This function is called periodically during operator control
      */
     public void teleopPeriodic() {
-        if(stick.getRawAxis(2) < 0.03 && stick.getRawAxis(2) > -0.03){
+        /* if(stick.getRawAxis(2) < 0.03 && stick.getRawAxis(2) > -0.03){
             LeftCmd = 0;
         } else LeftCmd = -stick.getRawAxis(2);
         if(stick.getRawAxis(4) < 0.03 && stick.getRawAxis(4) > -0.03) {
@@ -151,7 +153,16 @@ public class RobotTemplate extends IterativeRobot {
         drive(LeftCmd, RightCmd);
         
         SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder);
-    }
+    */
+        if(stick.getRawAxis(2) < 0.03 && stick.getRawAxis(2) > -0.03){
+            Speed = stick.getRawAxis(2);
+        }
+        if(stick.getRawAxis(3) < .03 && stick.getRawAxis(3) > -.03) {
+            Turn = stick.getRawAxis(3);
+        }
+        RightCmd = Speed - Turn;
+        LeftCmd = Speed + Turn;
+     }
 
     /**
      * This function is called periodically during test mode
