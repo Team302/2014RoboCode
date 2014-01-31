@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Victor;
 
+
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as described in the IterativeRobot
@@ -18,7 +19,7 @@ import edu.wpi.first.wpilibj.Victor;
  * creating this project, you must also update the manifest file in the resource
  * directory.
  */
-public class RobotTemplate extends IterativeRobot {
+public class RobotTemplate extends IterativeRobot implements RobotMap {
 
     /*
      * Only the cRIO can access the variables in this class. In order to 
@@ -65,13 +66,13 @@ public class RobotTemplate extends IterativeRobot {
      */
     
     public void robotInit() {
-        LeftMotor_1 = new Victor(1);
-        LeftMotor_2 = new Victor(2);
-        RightMotor_1 = new Victor(3);
-        RightMotor_2 = new Victor(4);
+        LeftMotor_1 = new Victor(PWM_LEFT_MOTOR_1);
+        LeftMotor_2 = new Victor(PWM_LEFT_MOTOR_2);
+        RightMotor_1 = new Victor(PWM_RIGHT_MOTOR_1);
+        RightMotor_2 = new Victor(PWM_RIGHT_MOTOR_2);
         stick = new Joystick(1);
-        LeftEncoder = new Encoder(10, 11);
-        RightEncoder = new Encoder(3, 4);
+        LeftEncoder = new Encoder(DIO_LEFT_ENCODER_ACHANNEL, DIO_LEFT_ENCODER_BCHANNEL);
+        RightEncoder = new Encoder(DIO_RIGHT_ENCODER_ACHANNEL, DIO_RIGHT_ENCODER_BCHANNEL);
         SDD = new SmartDashboardData();
         
         /*
