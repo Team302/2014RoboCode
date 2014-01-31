@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Victor;
 
+
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as described in the IterativeRobot
@@ -18,9 +19,9 @@ import edu.wpi.first.wpilibj.Victor;
  * creating this project, you must also update the manifest file in the resource
  * directory.
  */
-public class RobotTemplate extends IterativeRobot {
+public class RobotTemplate extends IterativeRobot implements RobotMap {
 
-    /**
+    /*
      * Only the cRIO can access the variables in this class. In order to 
      * interface with the robot through the Driver Station, use Network Tables.
      */    
@@ -35,12 +36,14 @@ public class RobotTemplate extends IterativeRobot {
     SmartDashboardData SDD;
     
     boolean IsTargetDistance;
+    double TargetDistanceL;
+    double TargetDistanceR;
     double TargetRateL;
     double TargetRateR;
     double LeftCmd;
     double RightCmd;
     
-    /**
+    /*
      * Enumerated Constants don't work with this version of Java (1.4) so these
      * serve as the enumerated constants for the Autonomous state machine.
      */
@@ -63,16 +66,16 @@ public class RobotTemplate extends IterativeRobot {
      */
     
     public void robotInit() {
-        LeftMotor_1 = new Victor(1);
-        LeftMotor_2 = new Victor(2);
-        RightMotor_1 = new Victor(3);
-        RightMotor_2 = new Victor(4);
+        LeftMotor_1 = new Victor(PWM_LEFT_MOTOR_1);
+        LeftMotor_2 = new Victor(PWM_LEFT_MOTOR_2);
+        RightMotor_1 = new Victor(PWM_RIGHT_MOTOR_1);
+        RightMotor_2 = new Victor(PWM_RIGHT_MOTOR_2);
         stick = new Joystick(1);
-        LeftEncoder = new Encoder(10, 11);
-        RightEncoder = new Encoder(3, 4);
+        LeftEncoder = new Encoder(DIO_LEFT_ENCODER_ACHANNEL, DIO_LEFT_ENCODER_BCHANNEL);
+        RightEncoder = new Encoder(DIO_RIGHT_ENCODER_ACHANNEL, DIO_RIGHT_ENCODER_BCHANNEL);
         SDD = new SmartDashboardData();
         
-        /**
+        /*
          * One Encoder pulse is approximately 1/28 inches.
          */
         
@@ -86,13 +89,13 @@ public class RobotTemplate extends IterativeRobot {
      * This function is called once before autonomous and should be used for any
      * initialization code.
      */
-    
     public void autonomousInit() {
         LeftEncoder.reset();
         RightEncoder.reset();
         
         IsTargetDistance = false; //not used yet
         TargetRateL = TargetRateR = 47.46428571428571; //Approximately 30% motor power
+        TargetDistanceL = TargetDistanceR = 12; //12 inches
         
         AutonMode = FORWARD_1;
         LeftCmd = 0;
@@ -106,7 +109,7 @@ public class RobotTemplate extends IterativeRobot {
      */
     public void autonomousPeriodic() {
         
-        /**
+        /*
          * Percent error to be used for Proportional control of the motors.
          */
         
@@ -114,7 +117,12 @@ public class RobotTemplate extends IterativeRobot {
         double PrateR = (TargetRateR - RightEncoder.getRate()) / TargetRateR;
         double DeltaDistance = LeftEncoder.getDistance()- RightEncoder.getDistance();
         
+        double PdistanceL = ((TargetDistanceL - LeftEncoder.getDistance()) / TargetDistanceL);
+        double PdistanceR = ((TargetDistanceR - RightEncoder.getDistance()) / TargetDistanceR);
         
+        /*
+        TODO: reduce to 5 cases
+        */
         switch(AutonMode){
             //Drive forward
             case FORWARD_1: {
@@ -130,14 +138,12 @@ public class RobotTemplate extends IterativeRobot {
                 LeftEncoder.reset();
                 RightEncoder.reset();
                 
-                TargetRateL = 47.46428571428571;
-                TargetRateR = -47.46428571428571;
-                
                 TimerCount = 0;
                 AutonMode = SHOOT_1;
                 }
             break;
-            } //Shoot the first ball (no shooter, waits for 500 loops)
+            } 
+            //Shoot the first ball (no shooter, waits for 50 loops)
             case SHOOT_1: {
                 if (TimerCount < 50){
                     TimerCount++;
@@ -152,7 +158,8 @@ public class RobotTemplate extends IterativeRobot {
                     AutonMode = BACKWARD_1;
                 }
                 break;
-            } //Drive backward
+            } 
+            //Drive backward
             case BACKWARD_1: {
                 if (LeftEncoder.getDistance() > -12 || RightEncoder.getDistance() > -12){
                     LeftCmd = -(0.15 * PrateL + 0.3);
@@ -160,30 +167,45 @@ public class RobotTemplate extends IterativeRobot {
                 } else {
                     TimerCount = 0;
                     AutonMode = TURN_RIGHT_90;
+                    
+                    LeftEncoder.reset();
+                    RightEncoder.reset();
+                    
+                    TargetDistanceL = 16.10066235;
+                    TargetDistanceR = -16.10066235;
                     //LoL is fun
                     //^Message from Kyle
                 }
                 break;
-            } //Turn right 90 degrees
+            } 
+            //Turn right 90 degrees
             case TURN_RIGHT_90: {
-                if(LeftEncoder.getDistance() < 16.10066235){
-                    LeftCmd = (0.15 * PrateL + 0.3);
+                boolean IsTargetDistanceL = false;
+                boolean IsTargetDistanceR = false;
+                
+                if(Math.abs(TargetDistanceL - LeftEncoder.getDistance()) > 0.1){
+                    LeftCmd = (0.3 * PdistanceL) + 0.15;
                 } else {
+                    IsTargetDistanceL = true;
                     LeftCmd = 0;
                 }
-                if(RightEncoder.getDistance() > -16.10066235) {
-                    RightCmd = -(0.15 * PrateR + 0.3);
+                
+                if(Math.abs(TargetDistanceR - RightEncoder.getDistance()) > 0.1){
+                    RightCmd = (0.3 * PdistanceR) - 0.15;
                 } else {
+                    IsTargetDistanceR = true;
                     RightCmd = 0;
-                } 
-                if (LeftCmd == 0 && RightCmd == 0){
+                }
+                
+                if (IsTargetDistanceL && IsTargetDistanceR){
                     TimerCount = 0;
                     LeftEncoder.reset();
                     RightEncoder.reset();
                     AutonMode = COLLECT_BALL;
                 }
                 break;
-            } //Grab a ball using whatever mechanism collects balls (no mechanism, so wait for 500 loops)
+            } 
+            //Grab a ball using whatever mechanism collects balls (no mechanism, so wait for 50 loops)
             case COLLECT_BALL: {
                 if (TimerCount < 50){
                     TimerCount++;
@@ -191,26 +213,43 @@ public class RobotTemplate extends IterativeRobot {
                     TimerCount = 0;
                     LeftEncoder.reset();
                     RightEncoder.reset();
-                    AutonMode = TURN_LEFT_90;
+                    
+                    TargetDistanceL = -16.10066235;
+                    TargetDistanceR = 16.10066235;
                     
                     TargetRateL = -47.46428571428571;
                     TargetRateR = 47.46428571428571;
+                    
+                    AutonMode = TURN_LEFT_90;
                 }
                 break;
-            } //Turn left after collecting the ball
+            } 
+            //Turn left after collecting the ball
             case TURN_LEFT_90: {
-                if(LeftEncoder.getDistance() > -16.10066235){
-                    LeftCmd = -(0.15 * PrateL + 0.3);
+                
+                boolean IsTargetDistanceL = false;
+                boolean IsTargetDistanceR = false;
+                
+                if(Math.abs(TargetDistanceL - LeftEncoder.getDistance()) > 0.1){
+                    LeftCmd = (0.3 * PdistanceL) - 0.15;
                 } else {
+                    IsTargetDistanceL = true;
                     LeftCmd = 0;
                 }
-                if(RightEncoder.getDistance() < 16.10066235) {
-                    RightCmd = (0.15 * PrateR + 0.3);
+                
+                if(Math.abs(TargetDistanceR - RightEncoder.getDistance()) > 0.1){
+                    RightCmd = (0.3 * PdistanceR) + 0.15;
                 } else {
+                    IsTargetDistanceR = true;
                     RightCmd = 0;
-                } 
-                if (LeftCmd == 0 && RightCmd == 0){
+                }
+                
+                if (IsTargetDistanceL && IsTargetDistanceR){
                     TimerCount = 0;
+                    
+                    LeftCmd = 0;
+                    RightCmd = 0;
+                    
                     LeftEncoder.reset();
                     RightEncoder.reset();
                     
@@ -236,7 +275,8 @@ public class RobotTemplate extends IterativeRobot {
                 TimerCount = 0;
                 AutonMode = SHOOT_2;
                 } break;
-            } //Shoot with the second ball (no shooter, so wait for 500 loops)
+            } 
+            //Shoot with the second ball (no shooter, so wait for 50 loops)
             case SHOOT_2: {
                 if (TimerCount < 50){
                     TimerCount++;
@@ -265,6 +305,8 @@ public class RobotTemplate extends IterativeRobot {
     /**
      * This function is called periodically during operator control
      */
+    
+    // Hello John, it is I Tucker, I've come to say hello.
     public void teleopPeriodic() {
         if(stick.getRawAxis(2) < 0.03 && stick.getRawAxis(2) > -0.03){
             LeftCmd = 0;
