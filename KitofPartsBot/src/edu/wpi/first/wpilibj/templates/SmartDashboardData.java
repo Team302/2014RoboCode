@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  *
  * @author John
  */
-public class SmartDashboardData {
+public class SmartDashboardData extends SmartDashboard{
 
     
    public void putSDData(Victor LeftMotor1, Victor LeftMotor2, Victor RightMotor1, Victor RightMotor2, Encoder LeftEncoder, Encoder RightEncoder) {

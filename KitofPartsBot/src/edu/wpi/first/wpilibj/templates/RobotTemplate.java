@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Victor;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 
 /**
@@ -34,6 +35,7 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
     Encoder LeftEncoder;
     Encoder RightEncoder;
     SmartDashboardData SDD;
+    NetworkTable table;
     
     boolean IsTargetDistance;
     double TargetDistanceL;
@@ -74,6 +76,7 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
         LeftEncoder = new Encoder(DIO_LEFT_ENCODER_ACHANNEL, DIO_LEFT_ENCODER_BCHANNEL);
         RightEncoder = new Encoder(DIO_RIGHT_ENCODER_ACHANNEL, DIO_RIGHT_ENCODER_BCHANNEL);
         SDD = new SmartDashboardData();
+        table = NetworkTable.getTable("datatable");
         
         /*
          * One Encoder pulse is approximately 1/28 inches.
@@ -183,15 +186,15 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
                 boolean IsTargetDistanceL = false;
                 boolean IsTargetDistanceR = false;
                 
-                if(Math.abs(TargetDistanceL - LeftEncoder.getDistance()) > 0.1){
-                    LeftCmd = (0.3 * PdistanceL) + 0.15;
+                if(LeftEncoder.getDistance() < 16.10066235){
+                    LeftCmd = (0.25 * PdistanceL) + 0.3;
                 } else {
                     IsTargetDistanceL = true;
                     LeftCmd = 0;
                 }
                 
-                if(Math.abs(TargetDistanceR - RightEncoder.getDistance()) > 0.1){
-                    RightCmd = (0.3 * PdistanceR) - 0.15;
+                if(RightEncoder.getDistance() > -16.10066235){
+                    RightCmd = -(0.25 * PdistanceR) - 0.3;
                 } else {
                     IsTargetDistanceR = true;
                     RightCmd = 0;
@@ -220,6 +223,9 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
                     TargetRateL = -47.46428571428571;
                     TargetRateR = 47.46428571428571;
                     
+                    LeftCmd = -0.45;
+                    RightCmd = 0.45;
+                    
                     AutonMode = TURN_LEFT_90;
                 }
                 break;
@@ -230,15 +236,15 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
                 boolean IsTargetDistanceL = false;
                 boolean IsTargetDistanceR = false;
                 
-                if(Math.abs(TargetDistanceL - LeftEncoder.getDistance()) > 0.1){
-                    LeftCmd = (0.3 * PdistanceL) - 0.15;
+                if(LeftEncoder.getDistance() > -15.10066235){
+                    LeftCmd = -(0.25 * PdistanceL) - 0.2;
                 } else {
                     IsTargetDistanceL = true;
                     LeftCmd = 0;
                 }
                 
-                if(Math.abs(TargetDistanceR - RightEncoder.getDistance()) > 0.1){
-                    RightCmd = (0.3 * PdistanceR) + 0.15;
+                if(RightEncoder.getDistance() < 16.10066235){
+                    RightCmd = (0.25 * PdistanceR) + 0.2;
                 } else {
                     IsTargetDistanceR = true;
                     RightCmd = 0;
@@ -249,6 +255,9 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
                     
                     LeftCmd = 0;
                     RightCmd = 0;
+                    
+                    SmartDashboardData.putNumber("EncoderL after Turn 2", LeftEncoder.getDistance());
+                    SmartDashboardData.putNumber("EncoderR after Turn 2", RightEncoder.getDistance());
                     
                     LeftEncoder.reset();
                     RightEncoder.reset();
