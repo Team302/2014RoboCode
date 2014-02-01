@@ -9,7 +9,6 @@ package edu.wpi.first.wpilibj.templates;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.Victor;
 
 /**
@@ -74,7 +73,7 @@ public class RobotTemplate extends IterativeRobot {
     /**
      * This function is called periodically during autonomous
      */
-    public void autonomousPeriodic() {
+    /*public void autonomousPeriodic() {
         
         double PrateL = (TargetRateL - LeftEncoder.getRate()) / TargetRateL;
         double PrateR = (TargetRateR - RightEncoder.getRate()) / TargetRateR;
@@ -137,7 +136,7 @@ public class RobotTemplate extends IterativeRobot {
         drive(LeftCmd, RightCmd);
         
         SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder);
-    }
+    }*/
 
     /**
      * This function is called periodically during operator control
@@ -154,14 +153,22 @@ public class RobotTemplate extends IterativeRobot {
         
         SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder);
     */
-        if(stick.getRawAxis(2) < 0.03 && stick.getRawAxis(2) > -0.03){
-            Speed = stick.getRawAxis(2);
+        if(stick.getRawAxis(2) > 0.03 || stick.getRawAxis(2) < -0.03){
+            Speed = -stick.getRawAxis(2);
+        }else{
+            Speed = 0;
         }
-        if(stick.getRawAxis(3) < .03 && stick.getRawAxis(3) > -.03) {
-            Turn = stick.getRawAxis(3);
+        if(stick.getRawAxis(3) > .03 || stick.getRawAxis(3) < -.03) {
+            Turn = -stick.getRawAxis(3);
+        }else{
+            Turn = 0;
         }
-        RightCmd = Speed - Turn;
-        LeftCmd = Speed + Turn;
+        
+        RightCmd = Speed + Turn;
+        LeftCmd = Speed - Turn;
+        
+        drive(LeftCmd, RightCmd);
+        SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder, stick);
      }
 
     /**
@@ -174,8 +181,8 @@ public class RobotTemplate extends IterativeRobot {
     public void drive(double leftspeed, double rightspeed){
         LeftMotor_1.set(leftspeed);
         LeftMotor_2.set(leftspeed);
-        RightMotor_1.set(rightspeed);
-        RightMotor_2.set(rightspeed);
+        RightMotor_1.set(-rightspeed);
+        RightMotor_2.set(-rightspeed);
     }
     /* public void putTeleopData() {
      SmartDashboard.putNumber("Left Motor 1", LeftMotor_1.get());

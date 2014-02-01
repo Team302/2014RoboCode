@@ -7,7 +7,7 @@
 package edu.wpi.first.wpilibj.templates;
 
 import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -15,10 +15,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  *
  * @author John
  */
-public class SmartDashboardData {
+public class SmartDashboardData extends SmartDashboard{
 
     
-   public void putSDData(Victor LeftMotor1, Victor LeftMotor2, Victor RightMotor1, Victor RightMotor2, Encoder LeftEncoder, Encoder RightEncoder) {
+   public void putSDData(Victor LeftMotor1, Victor LeftMotor2, Victor RightMotor1, Victor RightMotor2, Encoder LeftEncoder, Encoder RightEncoder, Joystick stick) {
         SmartDashboard.putNumber("Left Motor 1", LeftMotor1.get());
         SmartDashboard.putNumber("Left Motor 2", LeftMotor2.get());
         SmartDashboard.putNumber("Right Motor 1", RightMotor1.get());
@@ -27,6 +27,9 @@ public class SmartDashboardData {
         SmartDashboard.putNumber("Right Encoder", RightEncoder.getDistance());
         SmartDashboard.putNumber("Left Encoder Rate", LeftEncoder.getRate());
         SmartDashboard.putNumber("Right Encoder Rate", RightEncoder.getRate());
+        SmartDashboard.putNumber("Joystick Axis 2", stick.getRawAxis(2));
+        SmartDashboard.putNumber("Joystick Axis 3", stick.getRawAxis(3));
+        
         //SmartDashboard.putNumber("PID Thingy Left", LeftController.get());
    }
    
