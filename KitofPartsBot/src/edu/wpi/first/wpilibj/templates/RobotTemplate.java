@@ -378,5 +378,4 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
         RightMotor_1.set(-rightspeed);
         RightMotor_2.set(-rightspeed);
     }
-    
 }
