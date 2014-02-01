@@ -46,6 +46,7 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
     double RightCmd;
     double Speed;
     double Turn;
+    boolean RCMode;
     
     /*
      * Enumerated Constants don't work with this version of Java (1.4) so these
@@ -310,40 +311,46 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
         
         drive(LeftCmd, RightCmd);
         
-        SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder, stick);
+        SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder, stick, RCMode);
     }
 
     /**
      * This function is called periodically during operator control
      */
     public void teleopPeriodic() {
-        /* if(stick.getRawAxis(2) < 0.03 && stick.getRawAxis(2) > -0.03){
-            LeftCmd = 0;
-        } else LeftCmd = -stick.getRawAxis(2);
-        if(stick.getRawAxis(4) < 0.03 && stick.getRawAxis(4) > -0.03) {
-            RightCmd = 0;
-        } else RightCmd = stick.getRawAxis(4);
-        
-        drive(LeftCmd, RightCmd);
-        
-        SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder);
-    */
-        if(stick.getRawAxis(2) > 0.03 || stick.getRawAxis(2) < -0.03){
-            Speed = -stick.getRawAxis(2);
-        }else{
-            Speed = 0;
+        if(stick.getRawButton(11) == true){
+            RCMode = true;
+        }else if(stick.getRawButton(12) == true){
+            RCMode = false;
         }
-        if(stick.getRawAxis(3) > .03 || stick.getRawAxis(3) < -.03) {
-            Turn = -stick.getRawAxis(3);
+        if(RCMode = true){
+            if(stick.getRawAxis(2) < 0.03 && stick.getRawAxis(2) > -0.03){
+                LeftCmd = 0;
+            } else LeftCmd = -stick.getRawAxis(2);
+            if(stick.getRawAxis(4) < 0.03 && stick.getRawAxis(4) > -0.03) {
+                RightCmd = 0;
+            } else RightCmd = -stick.getRawAxis(4);
+        
+            drive(LeftCmd, RightCmd);
         }else{
-            Turn = 0;
+            if(stick.getRawAxis(2) > 0.03 || stick.getRawAxis(2) < -0.03){
+                Speed = -stick.getRawAxis(2);
+            }else{
+                Speed = 0;
+            }
+            if(stick.getRawAxis(3) > .03 || stick.getRawAxis(3) < -.03) {
+                Turn = -stick.getRawAxis(3);
+            }else{
+                Turn = 0;
+            }
+        
+            RightCmd = Speed + Turn;
+            LeftCmd = Speed - Turn;
+        
+            drive(LeftCmd, RightCmd);
         }
         
-        RightCmd = Speed + Turn;
-        LeftCmd = Speed - Turn;
-        
-        drive(LeftCmd, RightCmd);
-        SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder, stick);
+        SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder, stick, RCMode);
      }
 
     /**
