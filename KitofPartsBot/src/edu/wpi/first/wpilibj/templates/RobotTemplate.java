@@ -44,6 +44,8 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
     double TargetRateR;
     double LeftCmd;
     double RightCmd;
+    double Speed;
+    double Turn;
     
     /*
      * Enumerated Constants don't work with this version of Java (1.4) so these
@@ -308,8 +310,8 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
         
         drive(LeftCmd, RightCmd);
         
-        SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder);
-    }*/
+        SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder, stick);
+    }
 
     /**
      * This function is called periodically during operator control
