@@ -6,9 +6,11 @@
 /*----------------------------------------------------------------------------*/
 package edu.wpi.first.wpilibj.templates;
 
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
@@ -31,11 +33,16 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
     Victor LeftMotor_2;
     Victor RightMotor_1;
     Victor RightMotor_2;
+    Victor CollectorMotor;
+    Solenoid Jaws;
+    Solenoid Rotator;
     Joystick stick;
+    Joystick CoOpstick;
     Encoder LeftEncoder;
     Encoder RightEncoder;
     SmartDashboardData SDD;
     NetworkTable table;
+    Compressor Compressor;
     
     boolean IsTargetDistance;
     double TargetDistanceL;
@@ -47,7 +54,8 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
     double Speed;
     double Turn;
     boolean RCMode;
-    
+    boolean PRCMode;
+    boolean Pbutton11;
     /*
      * Enumerated Constants don't work with this version of Java (1.4) so these
      * serve as the enumerated constants for the Autonomous state machine.
@@ -75,11 +83,17 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
         LeftMotor_2 = new Victor(PWM_LEFT_MOTOR_2);
         RightMotor_1 = new Victor(PWM_RIGHT_MOTOR_1);
         RightMotor_2 = new Victor(PWM_RIGHT_MOTOR_2);
+        CollectorMotor = new Victor(PWM_COLLECTOR_MOTOR);
+        Jaws = new Solenoid(SOLENOID_JAWS);
+        Rotator = new Solenoid(SOLENOID_ROTATOR);
         stick = new Joystick(1);
+        CoOpstick = new Joystick(2);
         LeftEncoder = new Encoder(DIO_LEFT_ENCODER_ACHANNEL, DIO_LEFT_ENCODER_BCHANNEL);
         RightEncoder = new Encoder(DIO_RIGHT_ENCODER_ACHANNEL, DIO_RIGHT_ENCODER_BCHANNEL);
         SDD = new SmartDashboardData();
         table = NetworkTable.getTable("datatable");
+        Compressor = new Compressor(1, RELAY_COMPRESSOR);
+        Compressor.start();
         
         /*
          * One Encoder pulse is approximately 1/28 inches.
@@ -311,19 +325,18 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
         
         drive(LeftCmd, RightCmd);
         
-        SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder, stick, RCMode);
+        SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder, stick, CoOpstick, RCMode);
     }
 
     /**
      * This function is called periodically during operator control
      */
     public void teleopPeriodic() {
-        if(stick.getRawButton(11) == true){
-            RCMode = true;
-        }else if(stick.getRawButton(12) == true){
-            RCMode = false;
-        }
-        if(RCMode = true){
+        RCMode = true;
+        /*if(!Pbutton11 && CoOpstick.getRawButton(11)){
+            RCMode = !RCMode;
+        }*/
+        if(!RCMode){
             if(stick.getRawAxis(2) < 0.03 && stick.getRawAxis(2) > -0.03){
                 LeftCmd = 0;
             } else LeftCmd = -stick.getRawAxis(2);
@@ -349,9 +362,22 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
         
             drive(LeftCmd, RightCmd);
         }
+        if (CoOpstick.getRawButton(2)){
+            Jaws.set(true);
+        }else{
+            Jaws.set(false);
+        }
         
-        SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder, stick, RCMode);
-     }
+        if (CoOpstick.getRawButton(1)) {
+            Rotator.set(true);
+        }else{
+            Rotator.set(false);
+        }
+        CollectorMotor.set(CoOpstick.getRawAxis(2));
+        
+        SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder, stick, CoOpstick, RCMode);
+        Pbutton11 = CoOpstick.getRawButton(11);
+    }
 
     /**
      * This function is called periodically during test mode
