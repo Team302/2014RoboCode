@@ -35,13 +35,14 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
     Encoder RightEncoder;
     SmartDashboardData SDD;
     
-    boolean IsTargetDistance;
     double TargetDistanceL;
     double TargetDistanceR;
     double TargetRateL;
     double TargetRateR;
     double LeftCmd;
     double RightCmd;
+    double TemporaryTargetL;
+    double TemporaryTargetR;
     
     /*
      * Enumerated Constants don't work with this version of Java (1.4) so these
@@ -57,6 +58,8 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
     final int TURN_LEFT_90 = 6;
     final int FORWARD_2 = 7;
     final int SHOOT_2 = 8;
+    
+    boolean initloop;
     
     int TimerCount;
     
@@ -93,7 +96,6 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
         LeftEncoder.reset();
         RightEncoder.reset();
         
-        IsTargetDistance = false; //not used yet
         TargetRateL = TargetRateR = 47.46428571428571; //Approximately 30% motor power
         TargetDistanceL = TargetDistanceR = 12; //12 inches
         
@@ -319,12 +321,17 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
         
         SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder);
     }
-
+    
+    public void testInit() {
+        initloop = true;
+    }
     /**
      * This function is called periodically during test mode
      */
     public void testPeriodic() {
-
+        driveDistance(12, 12, initloop);
+        initloop = false;
+        SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder);
     }
     
     /**
@@ -346,4 +353,39 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
         RightMotor_2.set(-rightspeed);
     }
     
+    //TODO: test this maybe
+    
+    public boolean driveDistance(double leftdistance, double rightdistance, boolean initloop){
+        boolean IsTargetDistance;
+        double LeftError = TemporaryTargetL - LeftEncoder.getDistance();
+        double RightError = TemporaryTargetR - RightEncoder.getDistance();
+        
+        if(initloop) {
+            TemporaryTargetL = 0.96;
+            TemporaryTargetR = 0.96;
+            LeftEncoder.reset();
+            RightEncoder.reset();
+            IsTargetDistance = false;
+        } else if(Math.abs(LeftError) < 1 && Math.abs(RightError) < 1){
+            LeftCmd = 0;
+            RightCmd = 0;
+            IsTargetDistance = true;
+        } else {
+            LeftCmd = 0.03 * LeftError + 0.25 * Math.abs(LeftError) / LeftError;
+            RightCmd = 0.03 * RightError + 0.25 * Math.abs(RightError) / RightError;
+            
+            if(Math.abs(TemporaryTargetL + 0.96 * Math.abs(leftdistance) / leftdistance) > Math.abs(leftdistance)) {
+                TemporaryTargetL = leftdistance;
+            } else TemporaryTargetL = TemporaryTargetL + 0.96 * Math.abs(leftdistance) / leftdistance;
+            if(Math.abs(TemporaryTargetR + 0.96 * Math.abs(rightdistance) / rightdistance) > Math.abs(rightdistance)) {
+                TemporaryTargetR = rightdistance;
+            } else TemporaryTargetR = TemporaryTargetR + 0.96 * Math.abs(rightdistance) / rightdistance;
+            IsTargetDistance = false;
+        }
+        SmartDashboardData.putNumber("Left Error", LeftError);
+        SmartDashboardData.putNumber("Right Error", RightError);
+        SmartDashboardData.putNumber("Temporary Target Left", TemporaryTargetL);
+        SmartDashboardData.putNumber("Temporary Target Right", TemporaryTargetR);
+        return IsTargetDistance;
+    }
 }
