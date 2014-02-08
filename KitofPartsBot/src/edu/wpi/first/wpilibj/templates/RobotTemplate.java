@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
@@ -34,7 +35,7 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
     Victor RightMotor_1;
     Victor RightMotor_2;
     Victor CollectorMotor;
-    Solenoid Jaws;
+    DoubleSolenoid Jaws;
     Solenoid Rotator;
     Joystick stick;
     Joystick CoOpstick;
@@ -56,6 +57,7 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
     boolean RCMode;
     boolean PRCMode;
     boolean Pbutton11;
+    boolean AutonSwitch = false;
     /*
      * Enumerated Constants don't work with this version of Java (1.4) so these
      * serve as the enumerated constants for the Autonomous state machine.
@@ -84,7 +86,7 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
         RightMotor_1 = new Victor(PWM_RIGHT_MOTOR_1);
         RightMotor_2 = new Victor(PWM_RIGHT_MOTOR_2);
         CollectorMotor = new Victor(PWM_COLLECTOR_MOTOR);
-        Jaws = new Solenoid(SOLENOID_JAWS);
+        Jaws = new DoubleSolenoid(SOLENOID_JAWS_CLOSE, SOLENOID_JAWS_OPEN);
         Rotator = new Solenoid(SOLENOID_ROTATOR);
         stick = new Joystick(1);
         CoOpstick = new Joystick(2);
@@ -120,6 +122,7 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
         AutonMode = FORWARD_1;
         LeftCmd = 0;
         RightCmd = 0;
+        Jaws.set(DoubleSolenoid.Value.kForward);
         
         TimerCount = 0;
     }
@@ -146,14 +149,19 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
         switch(AutonMode){
             //Drive forward
             case FORWARD_1: {
-            if (LeftEncoder.getDistance() < 12 || RightEncoder.getDistance() < 12) {
+            /*if (LeftEncoder.getDistance() < 120 || RightEncoder.getDistance() < 120) {
                 
                 LeftCmd = (0.15 * PrateL + 0.3);
                 RightCmd = (0.15 * PrateR + 0.3);
-            
+            */
+            if (TimerCount < 50) {
+                LeftCmd = 0.3;
+                RightCmd = 0.3;
+                TimerCount++;
             } else {
                 LeftCmd = 0;
                 RightCmd = 0;
+                Jaws.set(DoubleSolenoid.Value.kReverse);
                 
                 LeftEncoder.reset();
                 RightEncoder.reset();
@@ -163,36 +171,45 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
                 }
             break;
             } 
-            //Shoot the first ball (no shooter, waits for 50 loops)
+            //Shoot the first ball. Dumps ball by running collector motor backwards.
             case SHOOT_1: {
                 if (TimerCount < 50){
                     TimerCount++;
+                    CollectorMotor.set(1);
                 } else {
                     TimerCount = 0;
+                    CollectorMotor.set(0);
+                    Jaws.set(DoubleSolenoid.Value.kForward);
+                    
                     LeftEncoder.reset();
                     RightEncoder.reset();
                     
                     TargetRateL = -47.46428571428571;
                     TargetRateR = -47.46428571428571;
                     
-                    AutonMode = BACKWARD_1;
+                    if(AutonSwitch) {
+                        AutonMode = BACKWARD_1;
+                    } else AutonMode = 0;
                 }
                 break;
             } 
             //Drive backward
             case BACKWARD_1: {
-                if (LeftEncoder.getDistance() > -12 || RightEncoder.getDistance() > -12){
+                if (LeftEncoder.getDistance() > -120 || RightEncoder.getDistance() > -120){
                     LeftCmd = -(0.15 * PrateL + 0.3);
                     RightCmd = -(0.15 * PrateR + 0.3);
                 } else {
                     TimerCount = 0;
-                    AutonMode = TURN_RIGHT_90;
                     
                     LeftEncoder.reset();
                     RightEncoder.reset();
                     
                     TargetDistanceL = 16.10066235;
                     TargetDistanceR = -16.10066235;
+                    
+                    if(AutonSwitch) {
+                        AutonMode = TURN_RIGHT_90;
+                    } else AutonMode = 0;
                     //LoL is fun
                     //^Message from Kyle
                 }
@@ -327,15 +344,20 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
         
         SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder, stick, CoOpstick, RCMode);
     }
-
+    /**
+     * This function is called before operator control and should be used for
+     * any initialization code.
+     */
+    public void teleopInit() {
+        RCMode = true;
+    }
     /**
      * This function is called periodically during operator control
      */
     public void teleopPeriodic() {
-        RCMode = true;
-        /*if(!Pbutton11 && CoOpstick.getRawButton(11)){
+        if(!Pbutton11 && CoOpstick.getRawButton(11)){
             RCMode = !RCMode;
-        }*/
+        }
         if(!RCMode){
             if(stick.getRawAxis(2) < 0.03 && stick.getRawAxis(2) > -0.03){
                 LeftCmd = 0;
@@ -362,12 +384,15 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
         
             drive(LeftCmd, RightCmd);
         }
-        if (CoOpstick.getRawButton(2)){
-            Jaws.set(true);
+        if(CoOpstick.getRawButton(3)) {
+            Jaws.set(DoubleSolenoid.Value.kOff);
         }else{
-            Jaws.set(false);
+            if (CoOpstick.getRawButton(2)){
+                Jaws.set(DoubleSolenoid.Value.kForward);
+            }else{
+                Jaws.set(DoubleSolenoid.Value.kReverse);
+            }
         }
-        
         if (CoOpstick.getRawButton(1)) {
             Rotator.set(true);
         }else{
