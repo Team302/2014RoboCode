@@ -18,7 +18,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class SmartDashboardData extends SmartDashboard{
 
     
-   public void putSDData(Victor LeftMotor1, Victor LeftMotor2, Victor RightMotor1, Victor RightMotor2, Encoder LeftEncoder, Encoder RightEncoder, Joystick stick, boolean Mode) {
+   public void putSDData(Victor LeftMotor1, Victor LeftMotor2, Victor RightMotor1, Victor RightMotor2, Encoder LeftEncoder, Encoder RightEncoder, Joystick stick, Joystick CoOpstick, boolean Mode) {
         SmartDashboard.putNumber("Left Motor 1", LeftMotor1.get());
         SmartDashboard.putNumber("Left Motor 2", LeftMotor2.get());
         SmartDashboard.putNumber("Right Motor 1", RightMotor1.get());
