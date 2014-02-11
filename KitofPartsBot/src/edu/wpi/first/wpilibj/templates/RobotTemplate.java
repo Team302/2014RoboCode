@@ -122,8 +122,8 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
         AutonMode = FORWARD_1;
         LeftCmd = 0;
         RightCmd = 0;
-
         Jaws.set(DoubleSolenoid.Value.kForward);
+        
         TimerCount = 0;
     }
 
@@ -161,7 +161,6 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
             } else {
                 LeftCmd = 0;
                 RightCmd = 0;
-
                 Jaws.set(DoubleSolenoid.Value.kReverse);
                 
                 LeftEncoder.reset();
@@ -180,7 +179,6 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
                 } else {
                     TimerCount = 0;
                     CollectorMotor.set(0);
-                    
                     Jaws.set(DoubleSolenoid.Value.kForward);
                     
                     LeftEncoder.reset();
@@ -386,7 +384,6 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
         
             drive(LeftCmd, RightCmd);
         }
-
         if(CoOpstick.getRawButton(3)) {
             Jaws.set(DoubleSolenoid.Value.kOff);
         }else{
