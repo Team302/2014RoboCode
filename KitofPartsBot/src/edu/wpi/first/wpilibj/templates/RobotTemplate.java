@@ -149,15 +149,16 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
         switch(AutonMode){
             //Drive forward
             case FORWARD_1: {
-            /*if (LeftEncoder.getDistance() < 120 || RightEncoder.getDistance() < 120) {
+            if (LeftEncoder.getDistance() < 120 || RightEncoder.getDistance() < 120) {
                 
                 LeftCmd = (0.15 * PrateL + 0.3);
                 RightCmd = (0.15 * PrateR + 0.3);
-            */
+            /*
             if (TimerCount < 50) {
                 LeftCmd = 0.3;
                 RightCmd = 0.3;
                 TimerCount++;
+            */
             } else {
                 LeftCmd = 0;
                 RightCmd = 0;
@@ -355,7 +356,7 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
      * This function is called periodically during operator control
      */
     public void teleopPeriodic() {
-        if(!Pbutton11 && CoOpstick.getRawButton(11)){
+        if(!Pbutton11 && stick.getRawButton(11)){
             RCMode = !RCMode;
         }
         if(!RCMode){
@@ -393,7 +394,7 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
                 Jaws.set(DoubleSolenoid.Value.kReverse);
             }
         }
-        if (CoOpstick.getRawButton(1)) {
+        if (!CoOpstick.getRawButton(1)) {
 
             Rotator.set(true);
         }else{
@@ -402,7 +403,7 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
         CollectorMotor.set(CoOpstick.getRawAxis(2));
         
         SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder, stick, CoOpstick, RCMode);
-        Pbutton11 = CoOpstick.getRawButton(11);
+        Pbutton11 = stick.getRawButton(11);
     }
 
     /**
