@@ -86,15 +86,7 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
         RightMotor_1 = new Victor(PWM_RIGHT_MOTOR_1);
         RightMotor_2 = new Victor(PWM_RIGHT_MOTOR_2);
         CollectorMotor = new Victor(PWM_COLLECTOR_MOTOR);
-<<<<<<< HEAD
-<<<<<<< HEAD
-        Jaws = new Solenoid(SOLENOID_JAWS_CLOSE);
-=======
         Jaws = new DoubleSolenoid(SOLENOID_JAWS_CLOSE, SOLENOID_JAWS_OPEN);
->>>>>>> c5a71d8841b802cd5ed38e7aa7369c1e7c04b780
-=======
-        Jaws = new DoubleSolenoid(SOLENOID_JAWS_CLOSE, SOLENOID_JAWS_OPEN);
->>>>>>> c5a71d8841b802cd5ed38e7aa7369c1e7c04b780
         Rotator = new Solenoid(SOLENOID_ROTATOR);
         stick = new Joystick(1);
         CoOpstick = new Joystick(2);
@@ -130,16 +122,8 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
         AutonMode = FORWARD_1;
         LeftCmd = 0;
         RightCmd = 0;
-<<<<<<< HEAD
-<<<<<<< HEAD
-        Jaws.set(true);
-=======
+
         Jaws.set(DoubleSolenoid.Value.kForward);
->>>>>>> c5a71d8841b802cd5ed38e7aa7369c1e7c04b780
-=======
-        Jaws.set(DoubleSolenoid.Value.kForward);
->>>>>>> c5a71d8841b802cd5ed38e7aa7369c1e7c04b780
-        
         TimerCount = 0;
     }
 
@@ -177,15 +161,8 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
             } else {
                 LeftCmd = 0;
                 RightCmd = 0;
-<<<<<<< HEAD
-<<<<<<< HEAD
-                Jaws.set(false);
-=======
+
                 Jaws.set(DoubleSolenoid.Value.kReverse);
->>>>>>> c5a71d8841b802cd5ed38e7aa7369c1e7c04b780
-=======
-                Jaws.set(DoubleSolenoid.Value.kReverse);
->>>>>>> c5a71d8841b802cd5ed38e7aa7369c1e7c04b780
                 
                 LeftEncoder.reset();
                 RightEncoder.reset();
@@ -203,15 +180,8 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
                 } else {
                     TimerCount = 0;
                     CollectorMotor.set(0);
-<<<<<<< HEAD
-<<<<<<< HEAD
-                    Jaws.set(true);
-=======
+                    
                     Jaws.set(DoubleSolenoid.Value.kForward);
->>>>>>> c5a71d8841b802cd5ed38e7aa7369c1e7c04b780
-=======
-                    Jaws.set(DoubleSolenoid.Value.kForward);
->>>>>>> c5a71d8841b802cd5ed38e7aa7369c1e7c04b780
                     
                     LeftEncoder.reset();
                     RightEncoder.reset();
@@ -416,19 +386,7 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
         
             drive(LeftCmd, RightCmd);
         }
-<<<<<<< HEAD
-<<<<<<< HEAD
-        
-            if (CoOpstick.getRawButton(2)){
-                Jaws.set(true);
-            }else{
-                Jaws.set(false);
-            }
-        
-        if (!CoOpstick.getRawButton(1)) {
-=======
-=======
->>>>>>> c5a71d8841b802cd5ed38e7aa7369c1e7c04b780
+
         if(CoOpstick.getRawButton(3)) {
             Jaws.set(DoubleSolenoid.Value.kOff);
         }else{
@@ -439,7 +397,7 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
             }
         }
         if (CoOpstick.getRawButton(1)) {
->>>>>>> c5a71d8841b802cd5ed38e7aa7369c1e7c04b780
+
             Rotator.set(true);
         }else{
             Rotator.set(false);
