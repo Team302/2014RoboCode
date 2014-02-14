@@ -64,6 +64,7 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
      */
     
     int AutonMode;
+    final int CLAMP_1 = 9;
     final int FORWARD_1 = 1;
     final int SHOOT_1 = 2;
     final int BACKWARD_1 = 3;
@@ -119,10 +120,10 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
         TargetRateL = TargetRateR = 47.46428571428571; //Approximately 30% motor power
         TargetDistanceL = TargetDistanceR = 12; //12 inches
         
-        AutonMode = FORWARD_1;
+        AutonMode = CLAMP_1;
         LeftCmd = 0;
         RightCmd = 0;
-        Jaws.set(DoubleSolenoid.Value.kForward);
+        Jaws.set(DoubleSolenoid.Value.kReverse);
         
         TimerCount = 0;
     }
@@ -147,22 +148,34 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
         TODO: reduce to 5 cases
         */
         switch(AutonMode){
+            case CLAMP_1: {
+                if(TimerCount < 100) {
+                Jaws.set(DoubleSolenoid.Value.kReverse);
+                Rotator.set(true);
+                CollectorMotor.set(0);
+                TimerCount++;
+                } else {
+                    TimerCount = 0;
+                    
+                    AutonMode = FORWARD_1;
+                }
+                break;
+            }
             //Drive forward
             case FORWARD_1: {
-            if (LeftEncoder.getDistance() < 120 || RightEncoder.getDistance() < 120) {
+            /*if (LeftEncoder.getDistance() < 120 || RightEncoder.getDistance() < 120) {
                 
                 LeftCmd = (0.15 * PrateL + 0.3);
                 RightCmd = (0.15 * PrateR + 0.3);
-            /*
-            if (TimerCount < 50) {
-                LeftCmd = 0.3;
-                RightCmd = 0.3;
-                TimerCount++;
             */
+            if (TimerCount < 50) {
+                LeftCmd = 0.45;
+                RightCmd = 0.45;
+                TimerCount++;
+            
             } else {
                 LeftCmd = 0;
                 RightCmd = 0;
-                Jaws.set(DoubleSolenoid.Value.kReverse);
                 
                 LeftEncoder.reset();
                 RightEncoder.reset();
@@ -174,13 +187,12 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
             } 
             //Shoot the first ball. Dumps ball by running collector motor backwards.
             case SHOOT_1: {
-                if (TimerCount < 50){
+                if (TimerCount < 100){
                     TimerCount++;
                     CollectorMotor.set(1);
                 } else {
                     TimerCount = 0;
-                    CollectorMotor.set(0);
-                    Jaws.set(DoubleSolenoid.Value.kForward);
+                    CollectorMotor.set(1);
                     
                     LeftEncoder.reset();
                     RightEncoder.reset();
@@ -335,6 +347,7 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
             }
             //don't do anything--should never be called
             default: {
+                CollectorMotor.set(0);
                 LeftCmd = 0;
                 RightCmd = 0;
                 break;
@@ -356,7 +369,7 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
      * This function is called periodically during operator control
      */
     public void teleopPeriodic() {
-        if(!Pbutton11 && stick.getRawButton(11)){
+        if(!Pbutton11 && stick.getRawButton(13)){
             RCMode = !RCMode;
         }
         if(!RCMode){
@@ -386,12 +399,12 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
             drive(LeftCmd, RightCmd);
         }
         if(CoOpstick.getRawButton(3)) {
-            Jaws.set(DoubleSolenoid.Value.kOff);
+            Jaws.set(DoubleSolenoid.Value.kReverse);
         }else{
             if (CoOpstick.getRawButton(2)){
                 Jaws.set(DoubleSolenoid.Value.kForward);
             }else{
-                Jaws.set(DoubleSolenoid.Value.kReverse);
+                Jaws.set(DoubleSolenoid.Value.kOff);
             }
         }
         if (!CoOpstick.getRawButton(1)) {
@@ -403,7 +416,7 @@ public class RobotTemplate extends IterativeRobot implements RobotMap {
         CollectorMotor.set(CoOpstick.getRawAxis(2));
         
         SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder, stick, CoOpstick, RCMode);
-        Pbutton11 = stick.getRawButton(11);
+        Pbutton11 = stick.getRawButton(13);
     }
 
     /**
