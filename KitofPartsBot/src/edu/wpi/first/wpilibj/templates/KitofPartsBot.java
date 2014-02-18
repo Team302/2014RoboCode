@@ -403,22 +403,26 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         }
         //Set the solenoid value for the Jaws, which is controlled by two
         //seperate solenoids
-        if(CoOpstick.getRawButton(1)) {
+        if(CoOpstick.getRawButton(3)) {
             jawsClose();
-        } else if(CoOpstick.getRawButton(2)) {
-            jawsRelax();
         } else if(CoOpstick.getRawButton(4)) {
             jawsOpen();
+        } else {
+            jawsRelax();
         }
         
-        //Set the value for the single Rotator solenoid
-        if (CoOpstick.getRawAxis(5) < -0.06) {
-            rotate(false);
-        }else if (CoOpstick.getRawAxis(5) > 0.06){
-            rotate(true);
+        if (CoOpstick.getRawButton(1)) {
+            collectorMCollect();
+        }else if (CoOpstick.getRawButton(2)){
+            collectorMSpit();
+        }else{
+            collectorMStop();
         }
-        //Set the collector motor
-        CollectorMotor.set(CoOpstick.getRawAxis(2));
+        
+        if(CoOpstick.getRawButton(6)){
+            rotate(true);
+        }else
+            rotate(false);
         
         SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder, stick, CoOpstick, RCMode);
         SmartDashboardData.putNumber(Jaws.getSmartDashboardType(), Jaws.get().value);
@@ -466,4 +470,18 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
     public void jawsRelax(){
         Jaws.set(DoubleSolenoid.Value.kOff);
     }
+    
+    public void collectorMCollect(){
+        CollectorMotor.set(-1);
+    }
+    
+    public void collectorMSpit(){
+        CollectorMotor.set(1);
+    }
+    
+    public void collectorMStop(){
+        CollectorMotor.set(0);
+    }
+    
+    
 }
