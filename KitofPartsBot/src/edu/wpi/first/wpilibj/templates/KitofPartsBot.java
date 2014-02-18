@@ -407,7 +407,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
             jawsClose();
         } else if(CoOpstick.getRawButton(4)) {
             jawsOpen();
-        } else {
+        } else if(CoOpstick.getRawButton(4) == false && CoOpstick.getRawButton(3) == false) {
             jawsRelax();
         }
         
