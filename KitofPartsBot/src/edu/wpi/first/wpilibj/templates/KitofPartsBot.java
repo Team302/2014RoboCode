@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
@@ -30,10 +31,10 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
      * interface with the robot through the Driver Station, use Network Tables.
      */    
     
-    Victor LeftMotor_1;
-    Victor LeftMotor_2;
-    Victor RightMotor_1;
-    Victor RightMotor_2;
+    Talon LeftMotor_1;
+    Talon LeftMotor_2;
+    Talon RightMotor_1;
+    Talon RightMotor_2;
     Victor CollectorMotor;
     DoubleSolenoid Jaws;
     Solenoid Rotator;
@@ -44,7 +45,6 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
     SmartDashboardData SDD;
     NetworkTable table;
     Compressor Compressor;
-    DoubleSolenoid.Value JawsState;
     
     boolean IsTargetDistance;
     double TargetDistanceL;
@@ -83,10 +83,10 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
      */
     
     public void robotInit() {
-        LeftMotor_1 = new Victor(PWM_LEFT_MOTOR_1);
-        LeftMotor_2 = new Victor(PWM_LEFT_MOTOR_2);
-        RightMotor_1 = new Victor(PWM_RIGHT_MOTOR_1);
-        RightMotor_2 = new Victor(PWM_RIGHT_MOTOR_2);
+        LeftMotor_1 = new Talon(PWM_LEFT_MOTOR_1);
+        LeftMotor_2 = new Talon(PWM_LEFT_MOTOR_2);
+        RightMotor_1 = new Talon(PWM_RIGHT_MOTOR_1);
+        RightMotor_2 = new Talon(PWM_RIGHT_MOTOR_2);
         CollectorMotor = new Victor(PWM_COLLECTOR_MOTOR);
         Jaws = new DoubleSolenoid(SOLENOID_JAWS_CLOSE, SOLENOID_JAWS_OPEN);
         Rotator = new Solenoid(SOLENOID_ROTATOR);
@@ -98,7 +98,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         table = NetworkTable.getTable("datatable");
         Compressor = new Compressor(DIO_PRESSURE_SWITCH, RELAY_COMPRESSOR);
         Compressor.start();
-        JawsState = DoubleSolenoid.Value.kOff;
+        jawsRelax();
         
         /*
          * One Encoder pulse is approximately 1/28 inches.
@@ -404,19 +404,18 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         //Set the solenoid value for the Jaws, which is controlled by two
         //seperate solenoids
         if(CoOpstick.getRawButton(1)) {
-            JawsState = DoubleSolenoid.Value.kReverse;
+            jawsClose();
         } else if(CoOpstick.getRawButton(2)) {
-            JawsState = DoubleSolenoid.Value.kOff;
+            jawsRelax();
         } else if(CoOpstick.getRawButton(4)) {
-            JawsState = DoubleSolenoid.Value.kForward;
+            jawsOpen();
         }
         
-        Jaws.set(JawsState);
         //Set the value for the single Rotator solenoid
         if (CoOpstick.getRawAxis(5) < -0.06) {
-            Rotator.set(false);
+            rotate(false);
         }else if (CoOpstick.getRawAxis(5) > 0.06){
-            Rotator.set(true);
+            rotate(true);
         }
         //Set the collector motor
         CollectorMotor.set(CoOpstick.getRawAxis(2));
@@ -450,5 +449,21 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         LeftMotor_2.set(leftspeed);
         RightMotor_1.set(-rightspeed);
         RightMotor_2.set(-rightspeed);
+    }
+    
+    public void rotate(boolean state){
+        Rotator.set(state);
+    }
+    
+    public void jawsClose(){
+        Jaws.set(DoubleSolenoid.Value.kReverse);
+    }
+    
+    public void jawsOpen(){
+        Jaws.set(DoubleSolenoid.Value.kForward);
+    }
+    
+    public void jawsRelax(){
+        Jaws.set(DoubleSolenoid.Value.kOff);
     }
 }
