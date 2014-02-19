@@ -32,4 +32,14 @@ public interface RobotMap {
     static final int SOLENOID_JAWS_OPEN = 5;
     static final int SOLENOID_SHIFTERS = 6;
     
+    
+    //Buttons/Switches Definition
+    
+    static final int JAWS_OPEN = 4;
+    static final int JAWS_ClOSE = 3;
+    
+    static final int COLLECTOR_MOTOR_IN = 1;
+    static final int COLLECTOR_MOTOR_OUT = 2;
+    
+    static final int ROTATOR_SWITCH = 6;
 }

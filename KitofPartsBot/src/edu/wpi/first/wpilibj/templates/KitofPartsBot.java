@@ -376,25 +376,13 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
             RCMode = !RCMode;
         }
         if(!RCMode){
-            if(stick.getRawAxis(2) < 0.03 && stick.getRawAxis(2) > -0.03){
-                LeftCmd = 0;
-            } else LeftCmd = -stick.getRawAxis(2);
-            if(stick.getRawAxis(5) < 0.03 && stick.getRawAxis(5) > -0.03) {
-                RightCmd = 0;
-            } else RightCmd = -stick.getRawAxis(5);
+            LeftCmd = deadband(2, .03);
+            RightCmd = deadband(5, .03);
         
             drive(LeftCmd, RightCmd);
         }else{
-            if(stick.getRawAxis(2) > 0.03 || stick.getRawAxis(2) < -0.03){
-                Speed = -stick.getRawAxis(2);
-            }else{
-                Speed = 0;
-            }
-            if(stick.getRawAxis(4) > .03 || stick.getRawAxis(4) < -.03) {
-                Turn = -stick.getRawAxis(4);
-            }else{
-                Turn = 0;
-            }
+            Speed = deadband(2, .03);
+            Turn = deadband(4, .03);
         
             RightCmd = Speed + Turn;
             LeftCmd = Speed - Turn;
@@ -403,26 +391,27 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         }
         //Set the solenoid value for the Jaws, which is controlled by two
         //seperate solenoids
-        if(CoOpstick.getRawButton(3)) {
+        if(CoOpstick.getRawButton(JAWS_ClOSE)) {
             jawsClose();
-        } else if(CoOpstick.getRawButton(4)) {
+        } else if(CoOpstick.getRawButton(JAWS_OPEN)) {
             jawsOpen();
-        } else if(CoOpstick.getRawButton(4) == false && CoOpstick.getRawButton(3) == false) {
+        } else if(CoOpstick.getRawButton(JAWS_ClOSE) == false && CoOpstick.getRawButton(JAWS_OPEN) == false) {
             jawsRelax();
+        } else{
+            jawsClose();
         }
-        
-        if (CoOpstick.getRawButton(1)) {
+        if (CoOpstick.getRawButton(COLLECTOR_MOTOR_IN)) {
             collectorMCollect();
-        }else if (CoOpstick.getRawButton(2)){
+        }else if (CoOpstick.getRawButton(COLLECTOR_MOTOR_OUT)){
             collectorMSpit();
         }else{
             collectorMStop();
         }
-        
-        if(CoOpstick.getRawButton(6)){
-            rotate(true);
-        }else
+
+        if(CoOpstick.getRawButton(ROTATOR_SWITCH)){
             rotate(false);
+        }else
+            rotate(true);
         
         SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder, stick, CoOpstick, RCMode);
         SmartDashboardData.putNumber(Jaws.getSmartDashboardType(), Jaws.get().value);
@@ -453,6 +442,14 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         LeftMotor_2.set(leftspeed);
         RightMotor_1.set(-rightspeed);
         RightMotor_2.set(-rightspeed);
+    }
+    
+    public double deadband(int axis, double deadband){
+        if (stick.getRawAxis(axis) > -deadband && stick.getRawAxis(axis) < deadband){
+            return 0;
+        }else{
+            return -stick.getRawAxis(axis);
+        }
     }
     
     public void rotate(boolean state){
