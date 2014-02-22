@@ -170,7 +170,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
             case CLAMP_1: {
                 if(TimerCount < 100) {
                 Jaws.set(DoubleSolenoid.Value.kReverse);
-                Rotator.set(true);
+                rotateDown();
                 CollectorMotor.set(-1);
                 TimerCount++;
                 } else {
