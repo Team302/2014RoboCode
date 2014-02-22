@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
@@ -35,6 +34,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
     Talon RightMotor_1;
     Talon RightMotor_2;
     Victor CollectorMotor;
+    Talon ShooterMotor;
     DoubleSolenoid Jaws;
     DoubleSolenoid Rotator;
     Joystick stick;
@@ -57,7 +57,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
     boolean RCMode;
     boolean PRCMode;
     boolean Pbutton11;
-    boolean AutonSwitch = true;
+    boolean AutonSwitch = false;
     /*
      * Enumerated Constants don't work with this version of Java (1.4) so these
      * serve as the enumerated constants for the Autonomous state machine.
@@ -110,20 +110,27 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
     /**
      * This function is called once before autonomous and should be used for any
      * initialization code.
-     */
+     */ 
+    double PrevErrorL;
+    double PrevErrorR;
+    
     public void autonomousInit() {
         LeftEncoder.reset();
         RightEncoder.reset();
 
         IsTargetDistance = false; //not used yet
-        TargetRateL = TargetRateR = 47.46428571428571; //Approximately 30% motor power
-        TargetDistanceL = TargetDistanceR = 12; //12 inches
-
+        TargetRateL = 237.3214285714286;
+        TargetRateR = 158.2142857142857; //Approximately 100% motor power
+        TargetDistanceL = 102;
+        TargetDistanceR = 155; //156 is 15 ft
+        
         AutonMode = CLAMP_1;
         LeftCmd = 0;
         RightCmd = 0;
         Jaws.set(DoubleSolenoid.Value.kReverse);
-
+        
+        PrevErrorL = 0;
+        PrevErrorR = 0;
         TimerCount = 0;
     }
 
@@ -135,24 +142,248 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         /*
          * Percent error to be used for Proportional control of the motors.
          */
+       
+        
         double PrateL = (TargetRateL - LeftEncoder.getRate()) / TargetRateL;
         double PrateR = (TargetRateR - RightEncoder.getRate()) / TargetRateR;
         double DeltaDistance = LeftEncoder.getDistance() - RightEncoder.getDistance();
 
         double PdistanceL = ((TargetDistanceL - LeftEncoder.getDistance()) / TargetDistanceL);
         double PdistanceR = ((TargetDistanceR - RightEncoder.getDistance()) / TargetDistanceR);
-
+        
+        double IdistanceL = PdistanceL + PrevErrorL;
+        double IdistanceR = PdistanceR + PrevErrorR;
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         /*
-         TODO: reduce to 5 cases
-         */
-        /*
-         jaw close
-         auton foward
-         rotator lower
-         timer
-         jaw relax
-         auton shoot
-         */
+        TODO: reduce to 5 cases
+        */
+        switch(AutonMode){
+            case CLAMP_1: {
+                if(TimerCount < 100) {
+                Jaws.set(DoubleSolenoid.Value.kReverse);
+                Rotator.set(true);
+                CollectorMotor.set(-1);
+                TimerCount++;
+                } else {
+                    TimerCount = 0;
+                    
+                    AutonMode = FORWARD_1;
+                }
+                break;
+            }
+            //Drive forward
+            case FORWARD_1: {
+            if (LeftEncoder.getDistance() < 102 && RightEncoder.getDistance() < 155) {
+                
+                LeftCmd =  0.9 * PdistanceL + 0.001 * IdistanceL;
+                RightCmd = 1.0625 * PdistanceR + 0.001 * IdistanceR;
+            /*
+            if (TimerCount < 50) {
+                LeftCmd = 0.45;
+                RightCmd = 0.45;
+                TimerCount++;
+            */
+            } else {
+                LeftCmd = 0;
+                RightCmd = 0;
+                
+                LeftEncoder.reset();
+                RightEncoder.reset();
+                
+                TimerCount = 0;
+                AutonMode = SHOOT_1;
+                }
+            break;
+            } 
+            //Shoot the first ball. Dumps ball by running collector motor backwards.
+            case SHOOT_1: {
+                if (TimerCount < 100){
+                    CollectorMotor.set(1);
+                    LeftCmd = 0.15;
+                    RightCmd = 0.15;
+                    TimerCount++;
+                } else {
+                    TimerCount = 0;
+                    CollectorMotor.set(0);
+                    LeftCmd = 0;
+                    RightCmd = 0;
+                    
+                    LeftEncoder.reset();
+                    RightEncoder.reset();
+                    
+                    IdistanceL = PrevErrorL = 0;
+                    IdistanceR = PrevErrorR = 0;
+                    
+                    TargetDistanceL = -102;
+                    TargetDistanceR = -156;
+                    if(AutonSwitch) {
+                        AutonMode = BACKWARD_1;
+                    } else AutonMode = 0;
+                }
+                break;
+            } 
+            //Drive backward
+            case BACKWARD_1: {
+                if (LeftEncoder.getDistance() >= -102 || RightEncoder.getDistance() >= -156){
+                    LeftCmd =  0.9 * PdistanceL + 0.001 * IdistanceL;
+                    RightCmd = 1.0625 * PdistanceR + 0.001 * IdistanceR;
+                } else {
+                    TimerCount = 0;
+                    
+                    LeftEncoder.reset();
+                    RightEncoder.reset();
+                    
+                    IdistanceL = PrevErrorL = 0;
+                    IdistanceR = PrevErrorR = 0;
+                    
+                    TargetDistanceL = 10.52733075;
+                    TargetDistanceR = -16.10066235;
+                    
+                    if(AutonSwitch) {
+                        AutonMode = TURN_RIGHT_90;
+                    } else AutonMode = 0;
+                    //LoL is fun
+                    //^Message from Kyle
+                }
+                break;
+            } 
+            //Turn right 90 degrees
+            case TURN_RIGHT_90: {
+                boolean IsTargetDistanceL = false;
+                boolean IsTargetDistanceR = false;
+                
+                if(LeftEncoder.getDistance() <= TargetDistanceL){
+                    LeftCmd = 0.9 * PdistanceL + 0.001 * IdistanceL;
+                } else {
+                    IsTargetDistanceL = true;
+                    LeftCmd = 0;
+                }
+                
+                if(RightEncoder.getDistance() >= TargetDistanceR ){
+                    RightCmd = 1.0625 * PdistanceR + 0.001 * IdistanceR;
+                } else {
+                    IsTargetDistanceR = true;
+                    RightCmd = 0;
+                }
+                
+                if (IsTargetDistanceL && IsTargetDistanceR){
+                    TimerCount = 0;
+                    LeftEncoder.reset();
+                    RightEncoder.reset();
+                    AutonMode = COLLECT_BALL;
+                }
+                break;
+            } 
+            //Grab a ball using whatever mechanism collects balls (no mechanism, so wait for 50 loops)
+            case COLLECT_BALL: {
+                if (TimerCount < 50){
+                    CollectorMotor.set(-1);
+                    LeftCmd = 0.2;
+                    RightCmd = 0.2;
+                    TimerCount++;
+                } else {
+                    TimerCount = 0;
+                    LeftEncoder.reset();
+                    RightEncoder.reset();
+                    
+                    TargetDistanceL = -10.52733075;
+                    TargetDistanceR = 16.10066235;
+                    
+                    LeftCmd = -0.45;
+                    RightCmd = -0.45;
+                    
+                    AutonMode = TURN_LEFT_90;
+                }
+                break;
+            } 
+            //Turn left after collecting the ball
+            case TURN_LEFT_90: {
+                
+                boolean IsTargetDistanceL = false;
+                boolean IsTargetDistanceR = false;
+                
+                if(LeftEncoder.getDistance() > TargetDistanceL){
+                    LeftCmd = -(0.25 * PdistanceL) - 0.2;
+                } else {
+                    IsTargetDistanceL = true;
+                    LeftCmd = 0;
+                }
+                
+                if(RightEncoder.getDistance() < 16.10066235){
+                    RightCmd = (0.25 * PdistanceR) + 0.2;
+                } else {
+                    IsTargetDistanceR = true;
+                    RightCmd = 0;
+                }
+                
+                if (IsTargetDistanceL && IsTargetDistanceR){
+                    TimerCount = 0;
+                    
+                    LeftCmd = 0;
+                    RightCmd = 0;
+                    
+                    LeftEncoder.reset();
+                    RightEncoder.reset();
+                    
+                    TargetRateL = 47.46428571428571;
+                    TargetRateR = 47.46428571428571;
+                    
+                    AutonMode = FORWARD_2;
+                } break;
+            }
+            case FORWARD_2: {
+                if (LeftEncoder.getDistance() < 120 || RightEncoder.getDistance() < 120) {
+                
+                LeftCmd = (0.15 * PrateL + 0.3);
+                RightCmd = (0.15 * PrateR + 0.3);
+            
+            } else {
+                LeftCmd = 0;
+                RightCmd = 0;
+                
+                LeftEncoder.reset();
+                RightEncoder.reset();
+                
+                TimerCount = 0;
+                AutonMode = SHOOT_2;
+                } break;
+            } 
+            //Shoot with the second ball (no shooter, so wait for 50 loops)
+            case SHOOT_2: {
+                if (TimerCount < 100){
+                    CollectorMotor.set(1);
+                    TimerCount++;
+                } else {
+                    TimerCount = 0;
+                    LeftEncoder.reset();
+                    RightEncoder.reset();
+                    LeftCmd = 0;
+                    RightCmd = 0;
+                }
+                break;
+            }
+            //don't do anything--should never be called
+            default: {
+                /*CollectorMotor.set(0);
+                LeftCmd = 0;
+                RightCmd = 0;*/
+                break;
+            }
+        }
+        
+        drive(LeftCmd, RightCmd);
+        PrevErrorL = IdistanceL;
+        PrevErrorR = IdistanceR;
+        
         SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder, stick, CoOpstick, RCMode);
     }
 
@@ -214,6 +445,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
 
         SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder, stick, CoOpstick, RCMode);
         SmartDashboardData.putNumber(Jaws.getSmartDashboardType(), Jaws.get().value);
+        SmartDashboardData.putNumber("Shooter Motor", ShooterMotor.get());
         Pbutton11 = stick.getRawButton(7);
     }
 
