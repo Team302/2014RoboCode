@@ -27,7 +27,8 @@ public interface RobotMap {
     
     static final int RELAY_COMPRESSOR = 2;
     
-    static final int SOLENOID_ROTATOR = 2;
+    static final int SOLENOID_ROTATOR_UP = 7;
+    static final int SOLENOID_ROTATOR_DOWN= 2;
     static final int SOLENOID_JAWS_CLOSE = 3;
     static final int SOLENOID_JAWS_OPEN = 5;
     static final int SOLENOID_SHIFTERS = 6;
@@ -42,4 +43,6 @@ public interface RobotMap {
     static final int COLLECTOR_MOTOR_OUT = 2;
     
     static final int ROTATOR_SWITCH = 6;
+    
+    static final int SHOOTER_BUTTON = 5;
 }
