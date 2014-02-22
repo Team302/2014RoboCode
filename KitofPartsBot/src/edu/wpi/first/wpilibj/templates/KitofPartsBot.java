@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
-
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as described in the IterativeRobot
@@ -29,16 +28,15 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
     /*
      * Only the cRIO can access the variables in this class. In order to 
      * interface with the robot through the Driver Station, use Network Tables.
-     */    
-    
-    Victor LeftMotor_1;
-    Victor LeftMotor_2;
-    Victor RightMotor_1;
-    Victor RightMotor_2;
+     */
+    Talon LeftMotor_1;
+    Talon LeftMotor_2;
+    Talon RightMotor_1;
+    Talon RightMotor_2;
     Victor CollectorMotor;
     Talon ShooterMotor;
     DoubleSolenoid Jaws;
-    Solenoid Rotator;
+    DoubleSolenoid Rotator;
     Joystick stick;
     Joystick CoOpstick;
     Encoder LeftEncoder;
@@ -46,8 +44,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
     SmartDashboardData SDD;
     NetworkTable table;
     Compressor Compressor;
-    DoubleSolenoid.Value JawsState;
-    
+
     boolean IsTargetDistance;
     double TargetDistanceL;
     double TargetDistanceR;
@@ -65,7 +62,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
      * Enumerated Constants don't work with this version of Java (1.4) so these
      * serve as the enumerated constants for the Autonomous state machine.
      */
-    
+
     int AutonMode;
     final int CLAMP_1 = 9;
     final int FORWARD_1 = 1;
@@ -76,23 +73,21 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
     final int TURN_LEFT_90 = 6;
     final int FORWARD_2 = 7;
     final int SHOOT_2 = 8;
-    
+
     int TimerCount;
-    
+
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
      */
-    
     public void robotInit() {
-        LeftMotor_1 = new Victor(PWM_LEFT_MOTOR_1);
-        LeftMotor_2 = new Victor(PWM_LEFT_MOTOR_2);
-        RightMotor_1 = new Victor(PWM_RIGHT_MOTOR_1);
-        RightMotor_2 = new Victor(PWM_RIGHT_MOTOR_2);
-        ShooterMotor = new Talon(PWM_SHOOTER_MOTOR);
+        LeftMotor_1 = new Talon(PWM_LEFT_MOTOR_1);
+        LeftMotor_2 = new Talon(PWM_LEFT_MOTOR_2);
+        RightMotor_1 = new Talon(PWM_RIGHT_MOTOR_1);
+        RightMotor_2 = new Talon(PWM_RIGHT_MOTOR_2);
         CollectorMotor = new Victor(PWM_COLLECTOR_MOTOR);
         Jaws = new DoubleSolenoid(SOLENOID_JAWS_CLOSE, SOLENOID_JAWS_OPEN);
-        Rotator = new Solenoid(SOLENOID_ROTATOR);
+        Rotator = new DoubleSolenoid(SOLENOID_ROTATOR_UP, SOLENOID_ROTATOR_DOWN);
         stick = new Joystick(1);
         CoOpstick = new Joystick(2);
         LeftEncoder = new Encoder(DIO_LEFT_ENCODER_ACHANNEL, DIO_LEFT_ENCODER_BCHANNEL);
@@ -101,12 +96,11 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         table = NetworkTable.getTable("datatable");
         Compressor = new Compressor(DIO_PRESSURE_SWITCH, RELAY_COMPRESSOR);
         Compressor.start();
-        JawsState = DoubleSolenoid.Value.kOff;
-        
+        jawsRelax();
+
         /*
          * One Encoder pulse is approximately 1/28 inches.
          */
-        
         LeftEncoder.setDistancePerPulse(0.0357142857142857);
         RightEncoder.setDistancePerPulse(0.0357142857142857);
         LeftEncoder.start();
@@ -123,7 +117,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
     public void autonomousInit() {
         LeftEncoder.reset();
         RightEncoder.reset();
-        
+
         IsTargetDistance = false; //not used yet
         TargetRateL = 237.3214285714286;
         TargetRateR = 158.2142857142857; //Approximately 100% motor power
@@ -144,7 +138,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
      * This function is called periodically during autonomous
      */
     public void autonomousPeriodic() {
-        
+
         /*
          * Percent error to be used for Proportional control of the motors.
          */
@@ -152,8 +146,8 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         
         double PrateL = (TargetRateL - LeftEncoder.getRate()) / TargetRateL;
         double PrateR = (TargetRateR - RightEncoder.getRate()) / TargetRateR;
-        double DeltaDistance = LeftEncoder.getDistance()- RightEncoder.getDistance();
-        
+        double DeltaDistance = LeftEncoder.getDistance() - RightEncoder.getDistance();
+
         double PdistanceL = ((TargetDistanceL - LeftEncoder.getDistance()) / TargetDistanceL);
         double PdistanceR = ((TargetDistanceR - RightEncoder.getDistance()) / TargetDistanceR);
         
@@ -176,7 +170,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
             case CLAMP_1: {
                 if(TimerCount < 100) {
                 Jaws.set(DoubleSolenoid.Value.kReverse);
-                Rotator.set(true);
+                rotateDown();
                 CollectorMotor.set(-1);
                 TimerCount++;
                 } else {
@@ -392,70 +386,63 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         
         SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder, stick, CoOpstick, RCMode);
     }
+
     /**
      * This function is called before operator control and should be used for
      * any initialization code.
      */
     public void teleopInit() {
         RCMode = true;
-        Rotator.set(true);
+        rotateDown();
     }
+
     /**
      * This function is called periodically during operator control
      */
     public void teleopPeriodic() {
         //Toggle between drive modes RC and Tank
-        if(!Pbutton11 && stick.getRawButton(7)){
+        if (!Pbutton11 && stick.getRawButton(7)) {
             RCMode = !RCMode;
         }
-        if(!RCMode){
-            if(stick.getRawAxis(2) < 0.03 && stick.getRawAxis(2) > -0.03){
-                LeftCmd = 0;
-            } else LeftCmd = -stick.getRawAxis(2);
-            if(stick.getRawAxis(5) < 0.03 && stick.getRawAxis(5) > -0.03) {
-                RightCmd = 0;
-            } else RightCmd = -stick.getRawAxis(5);
-        
+        if (!RCMode) {
+            LeftCmd = deadband(2, .03);
+            RightCmd = deadband(5, .03);
+
             drive(LeftCmd, RightCmd);
-        }else{
-            if(stick.getRawAxis(2) > 0.03 || stick.getRawAxis(2) < -0.03){
-                Speed = -stick.getRawAxis(2);
-            }else{
-                Speed = 0;
-            }
-            if(stick.getRawAxis(4) > .03 || stick.getRawAxis(4) < -.03) {
-                Turn = -stick.getRawAxis(4);
-            }else{
-                Turn = 0;
-            }
-        
+        } else {
+            Speed = deadband(2, .03);
+            Turn = deadband(4, .03);
+
             RightCmd = Speed + Turn;
             LeftCmd = Speed - Turn;
-        
+
             drive(LeftCmd, RightCmd);
         }
         //Set the solenoid value for the Jaws, which is controlled by two
         //seperate solenoids
-        if(CoOpstick.getRawButton(1)) {
-            JawsState = DoubleSolenoid.Value.kReverse;
-        } else if(CoOpstick.getRawButton(2)) {
-            JawsState = DoubleSolenoid.Value.kOff;
-        } else if(CoOpstick.getRawButton(4)) {
-            JawsState = DoubleSolenoid.Value.kForward;
+        if (CoOpstick.getRawButton(JAWS_ClOSE)) {
+            jawsClose();
+        } else if (CoOpstick.getRawButton(JAWS_OPEN)) {
+            jawsOpen();
+        } else if (CoOpstick.getRawButton(JAWS_ClOSE) == false && CoOpstick.getRawButton(JAWS_OPEN) == false) {
+            jawsRelax();
+        } else {
+            jawsClose();
         }
-        
-        Jaws.set(JawsState);
-        //Set the value for the single Rotator solenoid
-        if (CoOpstick.getRawAxis(5) < -0.06) {
-            Rotator.set(false);
-        }else if (CoOpstick.getRawAxis(5) > 0.06){
-            Rotator.set(true);
+        if (CoOpstick.getRawButton(COLLECTOR_MOTOR_IN)) {
+            collectorMCollect();
+        } else if (CoOpstick.getRawButton(COLLECTOR_MOTOR_OUT)) {
+            collectorMSpit();
+        } else {
+            collectorMStop();
         }
-        //Set the collector motor
-        CollectorMotor.set(CoOpstick.getRawAxis(2));
-        //Set the shooter motor
-        ShooterMotor.set(-CoOpstick.getRawAxis(3));
-        
+
+        if (CoOpstick.getRawButton(ROTATOR_SWITCH)) {
+            rotateUp();
+        } else {
+            rotateDown();
+        }
+
         SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder, stick, CoOpstick, RCMode);
         SmartDashboardData.putNumber(Jaws.getSmartDashboardType(), Jaws.get().value);
         SmartDashboardData.putNumber("Shooter Motor", ShooterMotor.get());
@@ -468,23 +455,62 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
     public void testPeriodic() {
 
     }
-    
+
     /**
      * Set the output for both motors
-     * 
-     * @param leftspeed double ranging from -1.0 to 1.0, adding anything higher 
+     *
+     * @param leftspeed double ranging from -1.0 to 1.0, adding anything higher
      * or lower will not cause errors and will automatically be adjusted
-     * 
+     *
      * @param rightspeed double ranging from -1.0 to 1.0, adding anything higher
-     * or lower will not cause errors and will automatically be adjusted. Right 
-     * Motor is inverted and the Victor can only be inverted directly in the 
+     * or lower will not cause errors and will automatically be adjusted. Right
+     * Motor is inverted and the Victor can only be inverted directly in the
      * output.
      */
-    
-    public void drive(double leftspeed, double rightspeed){
+    public void drive(double leftspeed, double rightspeed) {
         LeftMotor_1.set(leftspeed);
         LeftMotor_2.set(leftspeed);
         RightMotor_1.set(-rightspeed);
         RightMotor_2.set(-rightspeed);
+    }
+
+    public double deadband(int axis, double deadband) {
+        if (stick.getRawAxis(axis) > -deadband && stick.getRawAxis(axis) < deadband) {
+            return 0;
+        } else {
+            return stick.getRawAxis(axis);
+        }
+    }
+
+    public void rotateUp() {
+        Rotator.set(DoubleSolenoid.Value.kForward);
+    }
+
+    public void rotateDown() {
+        Rotator.set(DoubleSolenoid.Value.kReverse);
+    }
+
+    public void jawsClose() {
+        Jaws.set(DoubleSolenoid.Value.kReverse);
+    }
+
+    public void jawsOpen() {
+        Jaws.set(DoubleSolenoid.Value.kForward);
+    }
+
+    public void jawsRelax() {
+        Jaws.set(DoubleSolenoid.Value.kOff);
+    }
+
+    public void collectorMCollect() {
+        CollectorMotor.set(-1);
+    }
+
+    public void collectorMSpit() {
+        CollectorMotor.set(1);
+    }
+
+    public void collectorMStop() {
+        CollectorMotor.set(0);
     }
 }
