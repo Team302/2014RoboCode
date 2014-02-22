@@ -101,8 +101,8 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         /*
          * One Encoder pulse is approximately 1/28 inches.
          */
-        LeftEncoder.setDistancePerPulse(0.0357142857142857);
-        RightEncoder.setDistancePerPulse(0.0357142857142857);
+        LeftEncoder.setDistancePerPulse(0.0514285714285714);
+        RightEncoder.setDistancePerPulse(0.0514285714285714);
         LeftEncoder.start();
         RightEncoder.start();
     }
@@ -121,7 +121,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         IsTargetDistance = false; //not used yet
         TargetRateL = 237.3214285714286;
         TargetRateR = 158.2142857142857; //Approximately 100% motor power
-        TargetDistanceL = 102;
+        TargetDistanceL = 155;
         TargetDistanceR = 155; //156 is 15 ft
         
         AutonMode = CLAMP_1;
@@ -164,8 +164,8 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         
         
         /*
-        TODO: reduce to 5 cases
-        */
+         *TODO: reduce to 5 cases
+         */
         switch(AutonMode){
             case CLAMP_1: {
                 if(TimerCount < 100) {
@@ -182,7 +182,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
             }
             //Drive forward
             case FORWARD_1: {
-            if (LeftEncoder.getDistance() < 102 && RightEncoder.getDistance() < 155) {
+            if (LeftEncoder.getDistance() < 155 && RightEncoder.getDistance() < 155) {
                 
                 LeftCmd =  0.9 * PdistanceL + 0.001 * IdistanceL;
                 RightCmd = 1.0625 * PdistanceR + 0.001 * IdistanceR;
@@ -473,7 +473,19 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         RightMotor_1.set(-rightspeed);
         RightMotor_2.set(-rightspeed);
     }
-
+    
+    /**
+     * Sets a dead band on a joystick axis to prevent constant power drain.
+     * 
+     * @param axis The joystick axis to be used. The joystick is named "stick" 
+     * and is initialized in robotInit.
+     * 
+     * @param deadband The dead band value. If the joystick is within the dead
+     * band, the function returns 0.
+     * 
+     * @return If the joystick is within the dead band, returns 0. Otherwise, 
+     * the value of the axis will be returned.
+     */
     public double deadband(int axis, double deadband) {
         if (stick.getRawAxis(axis) > -deadband && stick.getRawAxis(axis) < deadband) {
             return 0;
@@ -481,35 +493,59 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
             return stick.getRawAxis(axis);
         }
     }
-
+    
+    /**
+     * Sets the value for the rotator to forward.
+     */
     public void rotateUp() {
         Rotator.set(DoubleSolenoid.Value.kForward);
     }
 
+    /**
+     * Sets the value for the rotator to reverse.
+     */
     public void rotateDown() {
         Rotator.set(DoubleSolenoid.Value.kReverse);
     }
 
+    /**
+     * Sets the value for the jaws to reverse.
+     */
     public void jawsClose() {
         Jaws.set(DoubleSolenoid.Value.kReverse);
     }
 
+    /**
+     * Sets the value for the jaws to forward.
+     */
     public void jawsOpen() {
         Jaws.set(DoubleSolenoid.Value.kForward);
     }
 
+    /**
+     * Sets the value for the jaws to off.
+     */
     public void jawsRelax() {
         Jaws.set(DoubleSolenoid.Value.kOff);
     }
 
+    /**
+     * Sets the collector motor to -1.
+     */
     public void collectorMCollect() {
         CollectorMotor.set(-1);
     }
 
+    /**
+     * Sets the collector motor to 1.
+     */
     public void collectorMSpit() {
         CollectorMotor.set(1);
     }
 
+    /**
+     * Sets the collector motor to 0.
+     */ 
     public void collectorMStop() {
         CollectorMotor.set(0);
     }
