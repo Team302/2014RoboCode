@@ -41,6 +41,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
     Joystick CoOpstick;
     Encoder LeftEncoder;
     Encoder RightEncoder;
+    Encoder ShooterEncoder;
     SmartDashboardData SDD;
     NetworkTable table;
     Compressor Compressor;
@@ -59,7 +60,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
     boolean Pbutton11;
     boolean AutonSwitch = false;
     /*
-     * Enumerated Constants don't work with this version of Java (1.4) so these
+     * Enumerated Constants don't work with this version of Java (ME 1.4) so these
      * serve as the enumerated constants for the Autonomous state machine.
      */
 
@@ -85,6 +86,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         LeftMotor_2 = new Talon(PWM_LEFT_MOTOR_2);
         RightMotor_1 = new Talon(PWM_RIGHT_MOTOR_1);
         RightMotor_2 = new Talon(PWM_RIGHT_MOTOR_2);
+        ShooterMotor = new Talon(PWM_SHOOTER_MOTOR);
         CollectorMotor = new Victor(PWM_COLLECTOR_MOTOR);
         Jaws = new DoubleSolenoid(SOLENOID_JAWS_CLOSE, SOLENOID_JAWS_OPEN);
         Rotator = new DoubleSolenoid(SOLENOID_ROTATOR_UP, SOLENOID_ROTATOR_DOWN);
@@ -92,12 +94,14 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         CoOpstick = new Joystick(2);
         LeftEncoder = new Encoder(DIO_LEFT_ENCODER_ACHANNEL, DIO_LEFT_ENCODER_BCHANNEL);
         RightEncoder = new Encoder(DIO_RIGHT_ENCODER_ACHANNEL, DIO_RIGHT_ENCODER_BCHANNEL);
+        ShooterEncoder = new Encoder(DIO_SHOOTER_ENCODER_ACHANNEL, DIO_SHOOTER_ENCODER_BCHANNEL);
         SDD = new SmartDashboardData();
         table = NetworkTable.getTable("datatable");
         Compressor = new Compressor(DIO_PRESSURE_SWITCH, RELAY_COMPRESSOR);
         Compressor.start();
         jawsRelax();
-
+        
+        shooterInit();
         /*
          * One Encoder pulse is approximately 1/28 inches.
          */
@@ -120,7 +124,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
 
         IsTargetDistance = false; //not used yet
         TargetRateL = 237.3214285714286;
-        TargetRateR = 158.2142857142857; //Approximately 100% motor power
+        TargetRateR = 158.2142857142857; //need new values
         TargetDistanceL = 155;
         TargetDistanceR = 155; //156 is 15 ft
         
@@ -373,9 +377,9 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
             }
             //don't do anything--should never be called
             default: {
-                /*CollectorMotor.set(0);
+                CollectorMotor.set(0);
                 LeftCmd = 0;
-                RightCmd = 0;*/
+                RightCmd = 0;
                 break;
             }
         }
@@ -442,10 +446,15 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         } else {
             rotateDown();
         }
+        
+        if(CoOpstick.getRawButton(SHOOTER_BUTTON)) {
+            shooterTrigger();
+        }
 
         SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder, stick, CoOpstick, RCMode);
         SmartDashboardData.putNumber(Jaws.getSmartDashboardType(), Jaws.get().value);
-        SmartDashboardData.putNumber("Shooter Motor", ShooterMotor.get());
+        //SmartDashboardData.putNumber("Shooter Motor", ShooterMotor.get());
+        shooterPeriodic();
         Pbutton11 = stick.getRawButton(7);
     }
 
@@ -548,5 +557,87 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
      */ 
     public void collectorMStop() {
         CollectorMotor.set(0);
+    }
+    
+        //
+    //  control shooter
+    //
+// later, make this its own class
+    int         ShooterTimer;
+    int         ShooterState;
+    final int   SHOOTER_STOP    = 0;
+    final int   SHOOTER_PREPARE = 1;
+    final int   SHOOTER_RETRACT = 2;
+    final int   SHOOTER_FIRE    = 3;
+    final int   SHOOTER_RETURN  = 4;
+    final int   SHOOTER_RELAX   = 5;
+    
+    // encoder positions
+    final double    SHOOTER_BACKSTOP    = -100;     // stop retracting when angle is less than this
+    final double    SHOOTER_FORWARDSTOP = 80;       // stop forward motion here
+    
+    public void shooterInit() {
+        ShooterState = SHOOTER_STOP;
+    }
+    
+    // call this to start the shooter sequence
+    public void shooterTrigger() {
+        if (ShooterState == SHOOTER_STOP) {
+            ShooterState = SHOOTER_PREPARE;
+            ShooterTimer = 0;
+        }
+        // else its already in motion
+    }
+    
+    // this gets called every 20ms in both Autonomous and Teleop
+    public void shooterPeriodic() {
+        //  Timeout to stop it in case it gets stuck
+        ShooterTimer++;
+        if (ShooterTimer > 200) {   // give up after 4 sec.
+            ShooterState = SHOOTER_STOP;   
+        }        
+        
+        //  Take action depending on the state
+        switch (ShooterState) {
+            
+            case SHOOTER_STOP:
+                ShooterMotor.set(0);
+                ShooterTimer = 0;
+                break;
+                
+            case SHOOTER_PREPARE:
+                // in future, maybe move a servo to unlock the shooter
+                ShooterState = SHOOTER_RETRACT;
+                break;
+                
+            case SHOOTER_RETRACT:
+                if (ShooterEncoder.getDistance() > SHOOTER_BACKSTOP) {
+                    ShooterMotor.set(-1);   // pull back
+                } else {
+                    ShooterMotor.set(0);    // stop for 20ms
+                    ShooterState = SHOOTER_FIRE;
+                }
+                break;
+                
+            case SHOOTER_FIRE:           
+                if (ShooterEncoder.getDistance() < SHOOTER_FORWARDSTOP) {
+                    ShooterMotor.set(1);    // swing to shoot
+                } else {
+                    ShooterMotor.set(0);    // stop
+                    ShooterState = SHOOTER_RELAX;
+                }
+                break;
+                
+            case SHOOTER_RELAX:
+                // in future, let it stop swinging & return to zero
+                //  plus lock with servo?
+                ShooterState = SHOOTER_STOP;
+                break;
+                
+            default:
+                ShooterMotor.set(0);
+                ShooterState = SHOOTER_STOP;
+                break;
+        }
     }
 }

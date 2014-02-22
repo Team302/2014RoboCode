@@ -17,13 +17,15 @@ public interface RobotMap {
     static final int PWM_RIGHT_MOTOR_1 = 3;
     static final int PWM_RIGHT_MOTOR_2 = 4;
     static final int PWM_COLLECTOR_MOTOR = 5;
-    static final int PWM_SHOOTER_MOTOR = 8;
+    static final int PWM_SHOOTER_MOTOR = 6;
     
     static final int DIO_PRESSURE_SWITCH = 6;
     static final int DIO_LEFT_ENCODER_ACHANNEL = 10;
     static final int DIO_LEFT_ENCODER_BCHANNEL = 11;
     static final int DIO_RIGHT_ENCODER_ACHANNEL = 13;
     static final int DIO_RIGHT_ENCODER_BCHANNEL = 14;
+    static final int DIO_SHOOTER_ENCODER_ACHANNEL = 7;
+    static final int DIO_SHOOTER_ENCODER_BCHANNEL = 8;
     
     static final int RELAY_COMPRESSOR = 2;
     
