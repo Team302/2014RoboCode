@@ -155,8 +155,8 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         double PrateR = (TargetRateR - RightEncoder.getRate()) / TargetRateR;
         double DeltaDistance = LeftEncoder.getDistance() - RightEncoder.getDistance();
 
-        double PdistanceL = ((TargetDistanceL - LeftEncoder.getDistance()) / TargetDistanceL);
-        double PdistanceR = ((TargetDistanceR - RightEncoder.getDistance()) / TargetDistanceR);
+        double PdistanceL = ((TargetDistanceL - LeftEncoder.getDistance()) / Math.abs(TargetDistanceL));
+        double PdistanceR = ((TargetDistanceR - RightEncoder.getDistance()) / Math.abs(TargetDistanceR));
         
         double IdistanceL = PdistanceL + PrevErrorL;
         double IdistanceR = PdistanceR + PrevErrorR;
@@ -225,26 +225,23 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
                     IdistanceL = PrevErrorL = 0;
                     IdistanceR = PrevErrorR = 0;
                     
-                    TargetDistanceL = -102;
+                    TargetDistanceL = -156;
                     TargetDistanceR = -156;
-                    if(AutonSwitch) {
-                        LeftEncoder.reset();
-                        RightEncoder.reset();
-                        AutonMode = BACKWARD_1;
-                    } else AutonMode = 0;
+                    
+                    LeftEncoder.reset();
+                    RightEncoder.reset();
+                    AutonMode = BACKWARD_1;
+                    
                 }
                 break;
             } 
             //Drive backward
             case BACKWARD_1: {
-                if (LeftEncoder.getDistance() >= -102 || RightEncoder.getDistance() >= -156){
-                    LeftCmd =  0.9 * PdistanceL + 0.001 * IdistanceL;
-                    RightCmd = 1.0625 * PdistanceR + 0.001 * IdistanceR;
+                if (LeftEncoder.getDistance() >= -156 || RightEncoder.getDistance() >= -156){
+                    LeftCmd =  1 * PdistanceL + 0.001 * IdistanceL;
+                    RightCmd = 1 * PdistanceR + 0.001 * IdistanceR;
                 } else {
                     TimerCount = 0;
-                    
-                    LeftEncoder.reset();
-                    RightEncoder.reset();
                     
                     IdistanceL = PrevErrorL = 0;
                     IdistanceR = PrevErrorR = 0;
@@ -254,6 +251,8 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
                     
                     if(AutonSwitch) {
                         AutonMode = TURN_RIGHT_90;
+                        LeftEncoder.reset();
+                        RightEncoder.reset();
                     } else AutonMode = 0;
                     //LoL is fun
                     //^Message from Kyle
@@ -390,12 +389,13 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         
         SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder, stick, CoOpstick, RCMode);
     }
-
+    int Timer;
     /**
      * This function is called before operator control and should be used for
      * any initialization code.
      */
     public void teleopInit() {
+        Timer = 0;
         RCMode = true;
         rotateDown();
         LeftEncoder.reset();
@@ -458,11 +458,23 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         /*if(CoOpstick.getRawButton(SHOOTER_BUTTON)) {
             shooterTrigger();
         }*/
+        if(CoOpstick.getRawButton(SHOOTER_BUTTON)) {
+            if (Timer > 0 && Timer < 25) {
+                ShooterMotor.set(-0.400);
+            } else if(Timer > 25 && Timer < 65) {
+                ShooterMotor.set(1);
+            } else {
+                ShooterMotor.set(0);
+            } Timer++;
+        } else {
+            Timer = 0;
+            ShooterMotor.set(0);
+        }
 
         SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder, stick, CoOpstick, RCMode);
         SmartDashboardData.putNumber(Jaws.getSmartDashboardType(), Jaws.get().value);
         //SmartDashboardData.putNumber("Shooter Motor", ShooterMotor.get());
-        shooterPeriodic();
+        //shooterPeriodic();
         Pbutton11 = stick.getRawButton(7);
     }
 
