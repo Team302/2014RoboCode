@@ -35,6 +35,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
     Talon RightMotor_2;
     Victor CollectorMotor;
     Talon ShooterMotor;
+    Solenoid Shifter;
     DoubleSolenoid Jaws;
     DoubleSolenoid Rotator;
     Joystick stick;
@@ -88,6 +89,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         RightMotor_2 = new Talon(PWM_RIGHT_MOTOR_2);
         ShooterMotor = new Talon(PWM_SHOOTER_MOTOR);
         CollectorMotor = new Victor(PWM_COLLECTOR_MOTOR);
+        Shifter = new Solenoid(SOLENOID_SHIFTERS);
         Jaws = new DoubleSolenoid(SOLENOID_JAWS_CLOSE, SOLENOID_JAWS_OPEN);
         Rotator = new DoubleSolenoid(SOLENOID_ROTATOR_UP, SOLENOID_ROTATOR_DOWN);
         stick = new Joystick(1);
@@ -125,13 +127,14 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         IsTargetDistance = false; //not used yet
         TargetRateL = 237.3214285714286;
         TargetRateR = 158.2142857142857; //need new values
-        TargetDistanceL = 155;
-        TargetDistanceR = 155; //156 is 15 ft
+        TargetDistanceL = 180;
+        TargetDistanceR = 180; //156 is 13 ft
         
         AutonMode = CLAMP_1;
         LeftCmd = 0;
         RightCmd = 0;
-        Jaws.set(DoubleSolenoid.Value.kReverse);
+        jawsClose();
+        rotateUp();
         
         PrevErrorL = 0;
         PrevErrorR = 0;
@@ -173,9 +176,9 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         switch(AutonMode){
             case CLAMP_1: {
                 if(TimerCount < 100) {
-                Jaws.set(DoubleSolenoid.Value.kReverse);
+                jawsClose();
                 rotateDown();
-                CollectorMotor.set(-1);
+                collectorMStop();
                 TimerCount++;
                 } else {
                     TimerCount = 0;
@@ -186,10 +189,10 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
             }
             //Drive forward
             case FORWARD_1: {
-            if (LeftEncoder.getDistance() < 155 && RightEncoder.getDistance() < 155) {
+            if (LeftEncoder.getDistance() < 180 && RightEncoder.getDistance() < 180) {
                 
-                LeftCmd =  0.9 * PdistanceL + 0.001 * IdistanceL;
-                RightCmd = 1.0625 * PdistanceR + 0.001 * IdistanceR;
+                LeftCmd =  1 * PdistanceL + 0.001 * IdistanceL;
+                RightCmd = 1.55 * PdistanceR + 0.001 * IdistanceR;
             /*
             if (TimerCount < 50) {
                 LeftCmd = 0.45;
@@ -199,9 +202,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
             } else {
                 LeftCmd = 0;
                 RightCmd = 0;
-                
-                LeftEncoder.reset();
-                RightEncoder.reset();
+                jawsRelax();
                 
                 TimerCount = 0;
                 AutonMode = SHOOT_1;
@@ -211,7 +212,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
             //Shoot the first ball. Dumps ball by running collector motor backwards.
             case SHOOT_1: {
                 if (TimerCount < 100){
-                    CollectorMotor.set(1);
+                    CollectorMotor.set(-1);
                     LeftCmd = 0.15;
                     RightCmd = 0.15;
                     TimerCount++;
@@ -221,15 +222,14 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
                     LeftCmd = 0;
                     RightCmd = 0;
                     
-                    LeftEncoder.reset();
-                    RightEncoder.reset();
-                    
                     IdistanceL = PrevErrorL = 0;
                     IdistanceR = PrevErrorR = 0;
                     
                     TargetDistanceL = -102;
                     TargetDistanceR = -156;
                     if(AutonSwitch) {
+                        LeftEncoder.reset();
+                        RightEncoder.reset();
                         AutonMode = BACKWARD_1;
                     } else AutonMode = 0;
                 }
@@ -398,6 +398,8 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
     public void teleopInit() {
         RCMode = true;
         rotateDown();
+        LeftEncoder.reset();
+        RightEncoder.reset();
     }
 
     /**
@@ -422,6 +424,12 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
 
             drive(LeftCmd, RightCmd);
         }
+        //Shift
+        if(stick.getRawButton(5)) {
+            Shifter.set(false);
+        } else if(stick.getRawButton(6)) {
+            Shifter.set(true);
+        }
         //Set the solenoid value for the Jaws, which is controlled by two
         //seperate solenoids
         if (CoOpstick.getRawButton(JAWS_ClOSE)) {
@@ -442,14 +450,14 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         }
 
         if (CoOpstick.getRawButton(ROTATOR_SWITCH)) {
-            rotateUp();
-        } else {
             rotateDown();
+        } else {
+            rotateUp();
         }
         
-        if(CoOpstick.getRawButton(SHOOTER_BUTTON)) {
+        /*if(CoOpstick.getRawButton(SHOOTER_BUTTON)) {
             shooterTrigger();
-        }
+        }*/
 
         SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder, stick, CoOpstick, RCMode);
         SmartDashboardData.putNumber(Jaws.getSmartDashboardType(), Jaws.get().value);
@@ -477,10 +485,10 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
      * output.
      */
     public void drive(double leftspeed, double rightspeed) {
-        LeftMotor_1.set(leftspeed);
-        LeftMotor_2.set(leftspeed);
-        RightMotor_1.set(-rightspeed);
-        RightMotor_2.set(-rightspeed);
+        LeftMotor_1.set(-leftspeed);
+        LeftMotor_2.set(-leftspeed);
+        RightMotor_1.set(rightspeed);
+        RightMotor_2.set(rightspeed);
     }
     
     /**
@@ -499,7 +507,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         if (stick.getRawAxis(axis) > -deadband && stick.getRawAxis(axis) < deadband) {
             return 0;
         } else {
-            return stick.getRawAxis(axis);
+            return -stick.getRawAxis(axis);
         }
     }
     
@@ -507,14 +515,14 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
      * Sets the value for the rotator to forward.
      */
     public void rotateUp() {
-        Rotator.set(DoubleSolenoid.Value.kForward);
+        Rotator.set(DoubleSolenoid.Value.kReverse);
     }
 
     /**
      * Sets the value for the rotator to reverse.
      */
     public void rotateDown() {
-        Rotator.set(DoubleSolenoid.Value.kReverse);
+        Rotator.set(DoubleSolenoid.Value.kForward);
     }
 
     /**
