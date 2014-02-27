@@ -35,6 +35,7 @@ public interface RobotMap {
     static final int SOLENOID_JAWS_CLOSE = 3;
     static final int SOLENOID_JAWS_OPEN = 5;
     static final int SOLENOID_SHIFTERS = 6;
+    static final int SOLENOID_SHOOTER_HOLDER = 4;
     
     
     //Buttons/Switches Definition

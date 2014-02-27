@@ -37,6 +37,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
     Victor CollectorMotor;
     Talon ShooterMotor;
     Solenoid Shifter;
+    Solenoid ShooterHolder;
     DoubleSolenoid Jaws;
     DoubleSolenoid Rotator;
     Joystick stick;
@@ -92,6 +93,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         ShooterMotor = new Talon(PWM_SHOOTER_MOTOR);
         CollectorMotor = new Victor(PWM_COLLECTOR_MOTOR);
         Shifter = new Solenoid(SOLENOID_SHIFTERS);
+        ShooterHolder = new Solenoid(SOLENOID_SHOOTER_HOLDER);
         Jaws = new DoubleSolenoid(SOLENOID_JAWS_CLOSE, SOLENOID_JAWS_OPEN);
         Rotator = new DoubleSolenoid(SOLENOID_ROTATOR_UP, SOLENOID_ROTATOR_DOWN);
         stick = new Joystick(1);
@@ -640,7 +642,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
                 break;
                 
             case SHOOTER_PREPARE:
-                // in future, maybe move a servo to unlock the shooter
+                ShooterHolder.set(false);
                 ShooterState = SHOOTER_RETRACT;
                 break;
                 
@@ -663,13 +665,17 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
                 break;
                 
             case SHOOTER_RELAX:
-                // in future, let it stop swinging & return to zero
-                //  plus lock with servo?
-                ShooterState = SHOOTER_STOP;
+                if(ShooterEncoder.getDistance() < -10) {
+                    ShooterHolder.set(true);
+                    ShooterState = SHOOTER_STOP;
+                } else {
+                    ShooterMotor.set(-0.400);
+                }
                 break;
                 
             case SHOOTER_MANUAL:
                 //Runs using the shooter timer
+                
                 if(ShooterTimer < 75) {
                     if (ShooterTimer > 0 && ShooterTimer < 25) {
                         ShooterMotor.set(-0.400);
@@ -678,12 +684,15 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
                     } else {
                         ShooterMotor.set(0);
                     }
+                } else if (ShooterTimer > 75 && ShooterTimer < 150) {
+                    ShooterMotor.set(-0.4);
                 } else {
+                    ShooterHolder.set(true);
                     ShooterState = SHOOTER_STOP;
                 }
                 break;
                 
-            default:
+            default: 
                 ShooterMotor.set(0);
                 ShooterState = SHOOTER_STOP;
                 break;
