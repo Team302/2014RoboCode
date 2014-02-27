@@ -7,6 +7,7 @@
 package edu.wpi.first.wpilibj.templates;
 
 import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
@@ -46,6 +47,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
     SmartDashboardData SDD;
     NetworkTable table;
     Compressor Compressor;
+    DigitalInput AutonOverride;
 
     boolean IsTargetDistance;
     double TargetDistanceL;
@@ -97,6 +99,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         LeftEncoder = new Encoder(DIO_LEFT_ENCODER_ACHANNEL, DIO_LEFT_ENCODER_BCHANNEL);
         RightEncoder = new Encoder(DIO_RIGHT_ENCODER_ACHANNEL, DIO_RIGHT_ENCODER_BCHANNEL);
         ShooterEncoder = new Encoder(DIO_SHOOTER_ENCODER_ACHANNEL, DIO_SHOOTER_ENCODER_BCHANNEL);
+        AutonOverride = new DigitalInput(DIO_AUTON_SWITCH);
         SDD = new SmartDashboardData();
         table = NetworkTable.getTable("datatable");
         Compressor = new Compressor(DIO_PRESSURE_SWITCH, RELAY_COMPRESSOR);
@@ -127,8 +130,14 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         IsTargetDistance = false; //not used yet
         TargetRateL = 237.3214285714286;
         TargetRateR = 158.2142857142857; //need new values
-        TargetDistanceL = 180;
-        TargetDistanceR = 180; //156 is 13 ft
+        
+        if(CoOpstick.getRawButton(AUTON_SHOOT_HIGH)) {
+            TargetDistanceL = 180;
+            TargetDistanceR = 180;
+        } else {
+            TargetDistanceL = 180;
+            TargetDistanceR = 180; //180 is 15 ft
+        }
         
         AutonMode = CLAMP_1;
         LeftCmd = 0;
@@ -202,7 +211,13 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
             } else {
                 LeftCmd = 0;
                 RightCmd = 0;
-                jawsRelax();
+                
+                if(CoOpstick.getRawButton(AUTON_SHOOT_HIGH)) {
+                    jawsOpen();
+                    rotateUp();
+                } else {
+                    jawsRelax();
+                }
                 
                 TimerCount = 0;
                 AutonMode = SHOOT_1;
@@ -212,10 +227,14 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
             //Shoot the first ball. Dumps ball by running collector motor backwards.
             case SHOOT_1: {
                 if (TimerCount < 100){
-                    CollectorMotor.set(-1);
-                    LeftCmd = 0.15;
-                    RightCmd = 0.15;
-                    TimerCount++;
+                    if (CoOpstick.getRawButton(AUTON_SHOOT_HIGH)) {
+                        shooterTrigger();
+                    } else {
+                        CollectorMotor.set(-1);
+                        LeftCmd = 0.15;
+                        RightCmd = 0.15;
+                        TimerCount++;
+                    }
                 } else {
                     TimerCount = 0;
                     CollectorMotor.set(0);
@@ -458,18 +477,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         /*if(CoOpstick.getRawButton(SHOOTER_BUTTON)) {
             shooterTrigger();
         }*/
-        if(CoOpstick.getRawButton(SHOOTER_BUTTON)) {
-            if (Timer > 0 && Timer < 25) {
-                ShooterMotor.set(-0.400);
-            } else if(Timer > 25 && Timer < 65) {
-                ShooterMotor.set(1);
-            } else {
-                ShooterMotor.set(0);
-            } Timer++;
-        } else {
-            Timer = 0;
-            ShooterMotor.set(0);
-        }
+        
 
         SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder, stick, CoOpstick, RCMode);
         SmartDashboardData.putNumber(Jaws.getSmartDashboardType(), Jaws.get().value);
@@ -591,6 +599,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
     final int   SHOOTER_FIRE    = 3;
     final int   SHOOTER_RETURN  = 4;
     final int   SHOOTER_RELAX   = 5;
+    final int   SHOOTER_MANUAL  = 6;
     
     // encoder positions
     final double    SHOOTER_BACKSTOP    = -100;     // stop retracting when angle is less than this
@@ -603,8 +612,13 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
     // call this to start the shooter sequence
     public void shooterTrigger() {
         if (ShooterState == SHOOTER_STOP) {
-            ShooterState = SHOOTER_PREPARE;
-            ShooterTimer = 0;
+            if(CoOpstick.getRawButton(SHOOTER_OVERRIDE)) {
+                ShooterState = SHOOTER_MANUAL;
+                ShooterTimer = 0;
+            } else {
+                ShooterState = SHOOTER_PREPARE;
+                ShooterTimer = 0;
+            }
         }
         // else its already in motion
     }
@@ -652,6 +666,21 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
                 // in future, let it stop swinging & return to zero
                 //  plus lock with servo?
                 ShooterState = SHOOTER_STOP;
+                break;
+                
+            case SHOOTER_MANUAL:
+                //Runs using the shooter timer
+                if(ShooterTimer < 75) {
+                    if (ShooterTimer > 0 && ShooterTimer < 25) {
+                        ShooterMotor.set(-0.400);
+                    } else if(ShooterTimer > 25 && ShooterTimer < 65) {
+                        ShooterMotor.set(1);
+                    } else {
+                        ShooterMotor.set(0);
+                    }
+                } else {
+                    ShooterState = SHOOTER_STOP;
+                }
                 break;
                 
             default:

@@ -26,6 +26,7 @@ public interface RobotMap {
     static final int DIO_RIGHT_ENCODER_BCHANNEL = 14;
     static final int DIO_SHOOTER_ENCODER_ACHANNEL = 7;
     static final int DIO_SHOOTER_ENCODER_BCHANNEL = 8;
+    static final int DIO_AUTON_SWITCH = 1;
     
     static final int RELAY_COMPRESSOR = 2;
     
@@ -47,4 +48,7 @@ public interface RobotMap {
     static final int ROTATOR_SWITCH = 6;
     
     static final int SHOOTER_BUTTON = 5;
+    static final int SHOOTER_OVERRIDE = 7;
+    
+    static final int AUTON_SHOOT_HIGH = 8;
 }
