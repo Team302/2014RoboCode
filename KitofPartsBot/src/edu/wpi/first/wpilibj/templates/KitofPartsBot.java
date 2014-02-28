@@ -114,8 +114,10 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
          */
         LeftEncoder.setDistancePerPulse(0.0514285714285714);
         RightEncoder.setDistancePerPulse(0.0514285714285714);
+        ShooterEncoder.setDistancePerPulse(0.9);
         LeftEncoder.start();
         RightEncoder.start();
+        ShooterEncoder.start();
     }
 
     /**
@@ -182,7 +184,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         
         
         /*
-         *TODO: reduce to 5 cases
+         *TODO: fix this plz!
          */
         switch(AutonMode){
             case CLAMP_1: {
@@ -398,6 +400,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
             //don't do anything--should never be called
             default: {
                 CollectorMotor.set(0);
+                ShooterMotor.set(0);
                 LeftCmd = 0;
                 RightCmd = 0;
                 break;
@@ -476,15 +479,15 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
             rotateUp();
         }
         
-        /*if(CoOpstick.getRawButton(SHOOTER_BUTTON)) {
+        if(CoOpstick.getRawButton(SHOOTER_BUTTON)) {
             shooterTrigger();
-        }*/
+        }
         
 
         SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder, stick, CoOpstick, RCMode);
         SmartDashboardData.putNumber(Jaws.getSmartDashboardType(), Jaws.get().value);
-        //SmartDashboardData.putNumber("Shooter Motor", ShooterMotor.get());
-        //shooterPeriodic();
+        SmartDashboardData.putNumber("Shooter Motor", ShooterMotor.get());
+        shooterPeriodic();
         Pbutton11 = stick.getRawButton(7);
     }
 
@@ -605,6 +608,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
     
     // encoder positions
     final double    SHOOTER_BACKSTOP    = -100;     // stop retracting when angle is less than this
+    final double    SHOOTER_SAFEANGLE   = -30;
     final double    SHOOTER_FORWARDSTOP = 80;       // stop forward motion here
     
     public void shooterInit() {
@@ -643,11 +647,12 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
                 
             case SHOOTER_PREPARE:
                 ShooterHolder.set(false);
+                jawsClose();
                 ShooterState = SHOOTER_RETRACT;
                 break;
                 
             case SHOOTER_RETRACT:
-                if (ShooterEncoder.getDistance() > SHOOTER_BACKSTOP) {
+                if (ShooterTimer < 25) {
                     ShooterMotor.set(-1);   // pull back
                 } else {
                     ShooterMotor.set(0);    // stop for 20ms
@@ -656,11 +661,14 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
                 break;
                 
             case SHOOTER_FIRE:           
-                if (ShooterEncoder.getDistance() < SHOOTER_FORWARDSTOP) {
+                if (ShooterTimer < 65) {
                     ShooterMotor.set(1);    // swing to shoot
                 } else {
                     ShooterMotor.set(0);    // stop
                     ShooterState = SHOOTER_RELAX;
+                }
+                if (ShooterTimer > 35) {
+                    jawsOpen();
                 }
                 break;
                 
@@ -679,12 +687,12 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
                 if(ShooterTimer < 75) {
                     if (ShooterTimer > 0 && ShooterTimer < 25) {
                         ShooterMotor.set(-0.400);
-                    } else if(ShooterTimer > 25 && ShooterTimer < 65) {
+                    } else if(ShooterTimer >= 25 && ShooterTimer < 65) {
                         ShooterMotor.set(1);
                     } else {
                         ShooterMotor.set(0);
                     }
-                } else if (ShooterTimer > 75 && ShooterTimer < 150) {
+                } else if (ShooterTimer < 150) {
                     ShooterMotor.set(-0.4);
                 } else {
                     ShooterHolder.set(true);
@@ -697,5 +705,6 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
                 ShooterState = SHOOTER_STOP;
                 break;
         }
+        SmartDashboardData.putNumber("Shooter Encoder", ShooterEncoder.getDistance());
     }
 }
