@@ -59,6 +59,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
     double RightCmd;
     double Speed;
     double Turn;
+    int i;
     boolean RCMode;
     boolean PRCMode;
     boolean Pbutton11;
@@ -152,6 +153,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         PrevErrorL = 0;
         PrevErrorR = 0;
         TimerCount = 0;
+        i = 0;
     }
 
     /**
@@ -180,17 +182,21 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         
         
         
+
         
-        
-        
+        shooterPeriodic();
         /*
          *TODO: fix this plz!
          */
         switch(AutonMode){
             case CLAMP_1: {
-                if(TimerCount < 100) {
+                if(TimerCount < 50) {
                 jawsClose();
-                rotateDown();
+                if(CoOpstick.getRawButton(AUTON_SHOOT_HIGH)) {
+                    rotateUp();
+                } else {
+                    rotateDown();
+                }
                 collectorMStop();
                 TimerCount++;
                 } else {
@@ -204,41 +210,37 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
             case FORWARD_1: {
             if (LeftEncoder.getDistance() < 180 && RightEncoder.getDistance() < 180) {
                 
-                LeftCmd =  1 * PdistanceL + 0.001 * IdistanceL;
-                RightCmd = 1.55 * PdistanceR + 0.001 * IdistanceR;
-            /*
-            if (TimerCount < 50) {
-                LeftCmd = 0.45;
-                RightCmd = 0.45;
-                TimerCount++;
-            */
+            LeftCmd =  0.75 - 0.15 * DeltaDistance;
+            RightCmd = 0.75 + 0.15 * DeltaDistance;
+            
             } else {
                 LeftCmd = 0;
                 RightCmd = 0;
                 
                 if(CoOpstick.getRawButton(AUTON_SHOOT_HIGH)) {
                     jawsOpen();
-                    rotateUp();
                 } else {
                     jawsRelax();
                 }
-                
                 TimerCount = 0;
                 AutonMode = SHOOT_1;
                 }
             break;
             } 
+
             //Shoot the first ball. Dumps ball by running collector motor backwards.
             case SHOOT_1: {
                 if (TimerCount < 100){
+                    
+                    
                     if (CoOpstick.getRawButton(AUTON_SHOOT_HIGH)) {
-                        shooterTrigger();
+                        if(TimerCount == 25) shooterTrigger();
                     } else {
-                        CollectorMotor.set(-1);
+                        CollectorMotor.set(1);
                         LeftCmd = 0.15;
                         RightCmd = 0.15;
-                        TimerCount++;
-                    }
+                    } 
+                    TimerCount++;
                 } else {
                     TimerCount = 0;
                     CollectorMotor.set(0);
@@ -261,8 +263,8 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
             //Drive backward
             case BACKWARD_1: {
                 if (LeftEncoder.getDistance() >= -156 || RightEncoder.getDistance() >= -156){
-                    LeftCmd =  1 * PdistanceL + 0.001 * IdistanceL;
-                    RightCmd = 1 * PdistanceR + 0.001 * IdistanceR;
+                    LeftCmd =  1    * PdistanceL + 0.001 * IdistanceL;
+                    RightCmd = 1.3  * PdistanceR + 0.001 * IdistanceR;
                 } else {
                     TimerCount = 0;
                     
@@ -312,7 +314,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
             //Grab a ball using whatever mechanism collects balls (no mechanism, so wait for 50 loops)
             case COLLECT_BALL: {
                 if (TimerCount < 50){
-                    CollectorMotor.set(-1);
+                    CollectorMotor.set(1);
                     LeftCmd = 0.2;
                     RightCmd = 0.2;
                     TimerCount++;
@@ -386,7 +388,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
             //Shoot with the second ball (no shooter, so wait for 50 loops)
             case SHOOT_2: {
                 if (TimerCount < 100){
-                    CollectorMotor.set(1);
+                    CollectorMotor.set(-1);
                     TimerCount++;
                 } else {
                     TimerCount = 0;
@@ -575,14 +577,14 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
      * Sets the collector motor to -1.
      */
     public void collectorMCollect() {
-        CollectorMotor.set(-1);
+        CollectorMotor.set(1);
     }
 
     /**
      * Sets the collector motor to 1.
      */
     public void collectorMSpit() {
-        CollectorMotor.set(1);
+        CollectorMotor.set(-1);
     }
 
     /**
@@ -604,7 +606,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
     final int   SHOOTER_FIRE    = 3;
     final int   SHOOTER_RETURN  = 4;
     final int   SHOOTER_RELAX   = 5;
-    final int   SHOOTER_MANUAL  = 6;
+    final int   SHOOTER_TRUSS  = 6;
     
     // encoder positions
     final double    SHOOTER_BACKSTOP    = -100;     // stop retracting when angle is less than this
@@ -618,13 +620,10 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
     // call this to start the shooter sequence
     public void shooterTrigger() {
         if (ShooterState == SHOOTER_STOP) {
-            if(CoOpstick.getRawButton(SHOOTER_OVERRIDE)) {
-                ShooterState = SHOOTER_MANUAL;
-                ShooterTimer = 0;
-            } else {
-                ShooterState = SHOOTER_PREPARE;
-                ShooterTimer = 0;
-            }
+            ShooterState = SHOOTER_PREPARE;
+            ShooterTimer = 0;
+            jawsOpen();
+            ShooterHolder.set(true);
         }
         // else its already in motion
     }
@@ -642,64 +641,54 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
             
             case SHOOTER_STOP:
                 ShooterMotor.set(0);
+                ShooterHolder.set(false);
                 ShooterTimer = 0;
                 break;
                 
             case SHOOTER_PREPARE:
-                ShooterHolder.set(false);
-                jawsClose();
                 ShooterState = SHOOTER_RETRACT;
                 break;
                 
             case SHOOTER_RETRACT:
-                if (ShooterTimer < 25) {
+                if (ShooterEncoder.getDistance() > -60) {
                     ShooterMotor.set(-1);   // pull back
                 } else {
                     ShooterMotor.set(0);    // stop for 20ms
-                    ShooterState = SHOOTER_FIRE;
+                    if(CoOpstick.getRawButton(SHOOTER_OVERRIDE)) {
+                        ShooterState = SHOOTER_TRUSS;
+                    } else {
+                        ShooterState = SHOOTER_FIRE;
+                    }
                 }
                 break;
                 
             case SHOOTER_FIRE:           
-                if (ShooterTimer < 65) {
+                if (ShooterEncoder.getDistance() < 70) {
                     ShooterMotor.set(1);    // swing to shoot
                 } else {
                     ShooterMotor.set(0);    // stop
                     ShooterState = SHOOTER_RELAX;
                 }
-                if (ShooterTimer > 35) {
-                    jawsOpen();
+                break;
+                
+            case SHOOTER_TRUSS:
+                if (ShooterEncoder.getDistance() < 70) {
+                    ShooterMotor.set(0.7);
+                } else {
+                    ShooterMotor.set(0);
+                    ShooterState = SHOOTER_RELAX;
                 }
                 break;
                 
             case SHOOTER_RELAX:
                 if(ShooterEncoder.getDistance() < -10) {
-                    ShooterHolder.set(true);
                     ShooterState = SHOOTER_STOP;
                 } else {
                     ShooterMotor.set(-0.400);
                 }
                 break;
                 
-            case SHOOTER_MANUAL:
-                //Runs using the shooter timer
-                
-                if(ShooterTimer < 75) {
-                    if (ShooterTimer > 0 && ShooterTimer < 25) {
-                        ShooterMotor.set(-0.400);
-                    } else if(ShooterTimer >= 25 && ShooterTimer < 65) {
-                        ShooterMotor.set(1);
-                    } else {
-                        ShooterMotor.set(0);
-                    }
-                } else if (ShooterTimer < 150) {
-                    ShooterMotor.set(-0.4);
-                } else {
-                    ShooterHolder.set(true);
-                    ShooterState = SHOOTER_STOP;
-                }
-                break;
-                
+            
             default: 
                 ShooterMotor.set(0);
                 ShooterState = SHOOTER_STOP;
