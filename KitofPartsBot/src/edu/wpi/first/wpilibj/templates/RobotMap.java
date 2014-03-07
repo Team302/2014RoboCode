@@ -30,25 +30,24 @@ public interface RobotMap {
     
     static final int RELAY_COMPRESSOR = 2;
     
+    static final int SOLENOID_SHOOTER_HOLDER = 1;
     static final int SOLENOID_ROTATOR_UP = 2;
-    static final int SOLENOID_ROTATOR_DOWN= 7;
     static final int SOLENOID_JAWS_CLOSE = 3;
     static final int SOLENOID_JAWS_OPEN = 5;
     static final int SOLENOID_SHIFTERS = 6;
-    static final int SOLENOID_SHOOTER_HOLDER = 1;
-    
+    static final int SOLENOID_ROTATOR_DOWN= 7;
     
     //Buttons/Switches Definition
-    
-    static final int JAWS_OPEN = 4;
-    static final int JAWS_ClOSE = 3;
-    
     static final int COLLECTOR_MOTOR_IN = 1;
     static final int COLLECTOR_MOTOR_OUT = 2;
     
-    static final int ROTATOR_SWITCH = 6;
+    static final int JAWS_ClOSE = 3;
+    static final int JAWS_OPEN = 4;
     
     static final int SHOOTER_BUTTON = 5;
+    
+    static final int ROTATOR_SWITCH = 6;
+    
     static final int SHOOTER_OVERRIDE = 7;
     
     static final int AUTON_SHOOT_HIGH = 8;
