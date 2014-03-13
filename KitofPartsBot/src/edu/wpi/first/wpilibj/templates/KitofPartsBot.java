@@ -194,6 +194,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
          *TODO: Fill the empty cases.
          */
         switch (AutonMode) {
+            
             case CLAMP_1: {
                 if (TimerCount < 50) {
                     jawsClose();
@@ -210,6 +211,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
                 }
                 break;
             }
+            
             //Drive forward
             case FORWARD_1: {
                 if (LeftEncoder.getDistance() < TargetDistanceL && RightEncoder.getDistance() < TargetDistanceR) {
@@ -231,6 +233,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
                 }
                 break;
             }
+            
             //Shoot the first ball.
             case SHOOT_1: {
                 if (TimerCount < 100) {
@@ -263,6 +266,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
                 }
                 break;
             }
+            
             //Drive backward
             case BACKWARD_1: {
                 if (LeftEncoder.getDistance() >= TargetDistanceL || RightEncoder.getDistance() >= TargetDistanceR) {
@@ -285,26 +289,31 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
                 }
                 break;
             }
+            
             //Turn right 90 degrees
             case TURN_RIGHT_90: {
                 //Eldon
                 break;
             }
+            
             //Grab a ball using whatever mechanism collects balls
             case COLLECT_BALL: {
 
                 break;
             }
+            
             //Turn left after collecting the ball
             case TURN_LEFT_90: {
 
                 break;
             }
+            
             //Shoot with the second ball
             case SHOOT_2: {
 
                 break;
             }
+            
             //don't do anything
             default: {
                 collectorMStop();
@@ -370,14 +379,12 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         }
         //Set the solenoid value for the Jaws, which is controlled by two
         //seperate solenoids
-        if (CoOpstick.getRawButton(JAWS_ClOSE)) {
+        if (CoOpstick.getRawButton(JAWS_CLOSE)) {
             jawsClose();
         } else if (CoOpstick.getRawButton(JAWS_OPEN)) {
             jawsOpen();
-        } else if (!CoOpstick.getRawButton(JAWS_ClOSE) && !CoOpstick.getRawButton(JAWS_OPEN)) {
-            jawsRelax();
         } else {
-            jawsClose();
+            jawsRelax();
         }
         if (CoOpstick.getRawButton(COLLECTOR_MOTOR_IN)) {
             collectorMCollect();
@@ -417,12 +424,12 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
      * Set the output for both motors
      *
      * @param leftspeed double ranging from -1.0 to 1.0, adding anything higher
-     * or lower will not cause errors and will automatically be adjusted
-     *
-     * @param rightspeed double ranging from -1.0 to 1.0, adding anything higher
-     * or lower will not cause errors and will automatically be adjusted. Right
+     * or lower will not cause errors and will automatically be adjusted. Left
      * Motor is inverted and the Victor can only be inverted directly in the
      * output.
+     *
+     * @param rightspeed double ranging from -1.0 to 1.0, adding anything higher
+     * or lower will not cause errors and will automatically be adjusted.
      */
     public void drive(double leftspeed, double rightspeed) {
         //Check consistency w/ practice bot
@@ -442,7 +449,8 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
      * band, the function returns 0.
      *
      * @return If the joystick is within the dead band, returns 0. Otherwise,
-     * the value of the axis will be returned.
+     * the negative of the axis will be returned because the joystick returns 
+     * negative in the positive direction.
      */
     public double deadband(int axis, double deadband) {
         if (stick.getRawAxis(axis) > -deadband && stick.getRawAxis(axis) < deadband) {
@@ -488,14 +496,14 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
     }
 
     /**
-     * Sets the collector motor to 1.
+     * Sets the collector motor to collect balls.
      */
     public void collectorMCollect() {
         CollectorMotor.set(1);
     }
 
     /**
-     * Sets the collector motor to -1.
+     * Sets the collector motor to spit balls.
      */
     public void collectorMSpit() {
         CollectorMotor.set(-1);
@@ -591,15 +599,16 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
             case SHOOTER_MANUAL:
                 if (ShooterTimer < 25) {
                     ShooterMotor.set(-.4);
-                }
-                if (ShooterTimer >= 25 && ShooterTimer < 75) {
-                    ShooterMotor.set(1);
-                }
-                if (ShooterTimer > 75 && ShooterTimer < 100) {
-                    ShooterMotor.set(-.4);
-                }
-                if (ShooterTimer > 100) {
-                    ShooterState = SHOOTER_STOP;
+                } else {
+                    if (ShooterTimer < 75) {
+                        ShooterMotor.set(1);
+                    } else {
+                        if (ShooterTimer < 100) {
+                        ShooterMotor.set(-.4);
+                        } else {
+                            ShooterState = SHOOTER_STOP;
+                        }
+                    }
                 }
                 break;
 
