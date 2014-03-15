@@ -600,10 +600,10 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
                 if (ShooterTimer < 25) {
                     ShooterMotor.set(-.4);
                 } else {
-                    if (ShooterTimer < 75) {
+                    if (ShooterTimer < 50) {
                         ShooterMotor.set(1);
                     } else {
-                        if (ShooterTimer < 100) {
+                        if (ShooterTimer < 75) {
                         ShooterMotor.set(-.4);
                         } else {
                             ShooterState = SHOOTER_STOP;
