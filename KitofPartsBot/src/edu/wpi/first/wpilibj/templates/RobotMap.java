@@ -38,17 +38,16 @@ public interface RobotMap {
     static final int SOLENOID_ROTATOR_DOWN= 7;
     
     //Buttons/Switches Definition
-    static final int COLLECTOR_MOTOR_IN = 1;
-    static final int COLLECTOR_MOTOR_OUT = 2;
+    static final int COLLECTOR_MOTOR_AXIS = 1;
     
-    static final int JAWS_CLOSE = 3;
+    static final int JAWS_CLOSE = 1;
     static final int JAWS_OPEN = 4;
     
-    static final int SHOOTER_BUTTON = 5;
+    static final int SHOOTER_BUTTON = 6;
     
-    static final int ROTATOR_SWITCH = 6;
+    static final int ROTATOR_AXIS = 5;
     
-    static final int SHOOTER_OVERRIDE = 7;
+    static final int SHOOTER_OVERRIDE = 5;
     
     static final int AUTON_SHOOT_HIGH = 8;
 }

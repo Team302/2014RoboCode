@@ -353,11 +353,11 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
             RCMode = !RCMode;
         }
 
-        if (ShooterState != SHOOTER_STOP) {
+        /*if (ShooterState != SHOOTER_STOP) {
             LeftCmd = 0.5 * (leftencodercount - LeftEncoder.getDistance());
             RightCmd = 0.5 * (rightencodercount - LeftEncoder.getDistance());
         } else {
-            //RCMode uses left joystick for speed, right joystick for turn
+            //RCMode uses left joystick for speed, right joystick for turn*/
             if (RCMode) {
                 Speed = deadband(2, .03);
                 Turn = deadband(4, .03);
@@ -370,7 +370,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
                 LeftCmd = deadband(2, .03);
                 RightCmd = deadband(5, .03);
             }
-        }
+        //}
         //Shift
         if (stick.getRawButton(5)) {
             Shifter.set(false);
@@ -386,15 +386,9 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         } else {
             jawsRelax();
         }
-        if (CoOpstick.getRawButton(COLLECTOR_MOTOR_IN)) {
-            collectorMCollect();
-        } else if (CoOpstick.getRawButton(COLLECTOR_MOTOR_OUT)) {
-            collectorMSpit();
-        } else {
-            collectorMStop();
-        }
+        CollectorMotor.set(-CoOpdeadband(2, 0.03));
 
-        if (CoOpstick.getRawButton(ROTATOR_SWITCH)) {
+        if (CoOpstick.getRawAxis(ROTATOR_AXIS) >= 0) {
             rotateDown();
         } else {
             rotateUp();
@@ -457,6 +451,14 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
             return 0;
         } else {
             return -stick.getRawAxis(axis);
+        }
+    }
+    
+    public double CoOpdeadband(int axis, double deadband) {
+        if (CoOpstick.getRawAxis(axis) > -deadband && CoOpstick.getRawAxis(axis) < deadband) {
+            return 0;
+        } else {
+            return -CoOpstick.getRawAxis(axis);
         }
     }
 
