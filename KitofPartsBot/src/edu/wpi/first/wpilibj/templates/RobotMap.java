@@ -41,6 +41,7 @@ public interface RobotMap {
     static final int COLLECTOR_MOTOR_AXIS = 1;
     
     static final int JAWS_CLOSE = 1;
+    static final int JAWS_RELAX = 2;
     static final int JAWS_OPEN = 4;
     
     static final int SHOOTER_BUTTON = 6;

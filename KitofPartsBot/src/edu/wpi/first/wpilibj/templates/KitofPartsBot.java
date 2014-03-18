@@ -117,6 +117,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
 
         jawsRelax();
         shooterInit();
+        driveInit();
     }
 
     /*
@@ -383,14 +384,14 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
             jawsClose();
         } else if (CoOpstick.getRawButton(JAWS_OPEN)) {
             jawsOpen();
-        } else {
+        } else if (CoOpstick.getRawButton(JAWS_RELAX)){
             jawsRelax();
         }
         CollectorMotor.set(-CoOpdeadband(2, 0.03));
 
-        if (CoOpstick.getRawAxis(ROTATOR_AXIS) >= 0) {
+        if (CoOpstick.getRawAxis(ROTATOR_AXIS) >= 0.5) {
             rotateDown();
-        } else {
+        } else if(CoOpstick.getRawAxis(ROTATOR_AXIS) <= -0.5){
             rotateUp();
         }
 
@@ -413,13 +414,22 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
     public void testPeriodic() {
 
     }
-
+    
+    double leftoutput;
+    double rightoutput;
+    double accelerationlimit;
+    
+    public void driveInit() {
+        leftoutput = 0;
+        rightoutput = 0;
+        accelerationlimit = 0.02;
+    }
     /**
      * Set the output for both motors
      *
      * @param leftspeed double ranging from -1.0 to 1.0, adding anything higher
      * or lower will not cause errors and will automatically be adjusted. Left
-     * Motor is inverted and the Victor can only be inverted directly in the
+     * Motor is inverted and the Talon can only be inverted directly in the
      * output.
      *
      * @param rightspeed double ranging from -1.0 to 1.0, adding anything higher
@@ -427,10 +437,27 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
      */
     public void drive(double leftspeed, double rightspeed) {
         //Check consistency w/ practice bot
-        LeftMotor_1.set(-leftspeed);
-        LeftMotor_2.set(-leftspeed);
-        RightMotor_1.set(rightspeed);
-        RightMotor_2.set(rightspeed);
+        if(Rotator.get() == DoubleSolenoid.Value.kReverse) {
+             if(leftspeed >= leftoutput) {
+                 leftoutput = leftoutput + accelerationlimit;
+             } else if (leftspeed <= leftoutput) {
+                 leftoutput = leftoutput - accelerationlimit;
+             }
+             if(rightspeed >= rightoutput) {
+                 rightoutput = rightoutput + accelerationlimit;
+             } else if (rightspeed <= rightoutput) {
+                 rightoutput = rightoutput - accelerationlimit;
+             }
+             LeftMotor_1.set(-leftoutput);
+             LeftMotor_2.set(-leftoutput);
+             RightMotor_1.set(rightoutput);
+             RightMotor_2.set(rightoutput);
+        } else {
+            LeftMotor_1.set(-leftspeed);
+            LeftMotor_2.set(-leftspeed);
+            RightMotor_1.set(rightspeed);
+            RightMotor_2.set(rightspeed);
+        }
     }
 
     /**
