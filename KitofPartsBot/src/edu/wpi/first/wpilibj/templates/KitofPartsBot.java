@@ -145,7 +145,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
         LeftEncoder.reset();
         RightEncoder.reset();
 
-        if (CoOpstick.getRawButton(AUTON_SHOOT_HIGH)) {
+        if (!CoOpstick.getRawButton(AUTON_SHOOT_HIGH)) {
             TargetDistanceL = 180;
             TargetDistanceR = 180;
         } else {
@@ -199,7 +199,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
             case CLAMP_1: {
                 if (TimerCount < 50) {
                     jawsClose();
-                    if (CoOpstick.getRawButton(AUTON_SHOOT_HIGH)) {
+                    if (!CoOpstick.getRawButton(AUTON_SHOOT_HIGH)) {
                         rotateUp();
                     } else {
                         rotateDown();
@@ -224,7 +224,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
                     LeftCmd = 0;
                     RightCmd = 0;
 
-                    if (CoOpstick.getRawButton(AUTON_SHOOT_HIGH)) {
+                    if (!CoOpstick.getRawButton(AUTON_SHOOT_HIGH)) {
                         jawsOpen();
                     } else {
                         jawsRelax();
@@ -238,7 +238,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
             //Shoot the first ball.
             case SHOOT_1: {
                 if (TimerCount < 100) {
-                    if (CoOpstick.getRawButton(AUTON_SHOOT_HIGH)) {
+                    if (!CoOpstick.getRawButton(AUTON_SHOOT_HIGH)) {
                         if (TimerCount == 25) {
                             shooterTrigger();
                         }
@@ -338,7 +338,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
     public void teleopInit() {
         RCMode = true;
 
-        rotateDown();
+        rotateUp();
 
         LeftEncoder.reset();
         RightEncoder.reset();
@@ -437,16 +437,20 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
      */
     public void drive(double leftspeed, double rightspeed) {
         //Check consistency w/ practice bot
-        if(Rotator.get() == DoubleSolenoid.Value.kReverse) {
-             if(leftspeed >= leftoutput) {
+        if(false) {
+             if(leftspeed >= leftoutput && leftoutput < 0) {
                  leftoutput = leftoutput + accelerationlimit;
-             } else if (leftspeed <= leftoutput) {
+             } else if (leftspeed <= leftoutput && leftspeed < 0) {
                  leftoutput = leftoutput - accelerationlimit;
+             } else {
+                 leftoutput = leftspeed;
              }
-             if(rightspeed >= rightoutput) {
+             if(rightspeed >= rightoutput && rightoutput < 0) {
                  rightoutput = rightoutput + accelerationlimit;
-             } else if (rightspeed <= rightoutput) {
+             } else if (rightspeed <= rightoutput && rightspeed < 0) {
                  rightoutput = rightoutput - accelerationlimit;
+             } else {
+                 rightoutput = rightspeed;
              }
              LeftMotor_1.set(-leftoutput);
              LeftMotor_2.set(-leftoutput);
@@ -572,7 +576,7 @@ public class KitofPartsBot extends IterativeRobot implements RobotMap {
 
     // call this to start the shooter sequence
     public void shooterTrigger() {
-        if (ShooterState == SHOOTER_STOP) {
+        if (ShooterState == SHOOTER_STOP && Jaws.get() == DoubleSolenoid.Value.kForward) {
             ShooterState = SHOOTER_PREPARE;
             ShooterTimer = 0;
             ShooterHolder.set(true);
