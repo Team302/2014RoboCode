@@ -15,13 +15,13 @@
 <span class="sourceLineNo">007</span>package edu.wpi.first.wpilibj.templates;<a name="line.7"></a>
 <span class="sourceLineNo">008</span><a name="line.8"></a>
 <span class="sourceLineNo">009</span>import edu.wpi.first.wpilibj.Compressor;<a name="line.9"></a>
-<span class="sourceLineNo">010</span>import edu.wpi.first.wpilibj.Encoder;<a name="line.10"></a>
-<span class="sourceLineNo">011</span>import edu.wpi.first.wpilibj.IterativeRobot;<a name="line.11"></a>
-<span class="sourceLineNo">012</span>import edu.wpi.first.wpilibj.Joystick;<a name="line.12"></a>
-<span class="sourceLineNo">013</span>import edu.wpi.first.wpilibj.Solenoid;<a name="line.13"></a>
-<span class="sourceLineNo">014</span>import edu.wpi.first.wpilibj.DoubleSolenoid;<a name="line.14"></a>
-<span class="sourceLineNo">015</span>import edu.wpi.first.wpilibj.Talon;<a name="line.15"></a>
-<span class="sourceLineNo">016</span>import edu.wpi.first.wpilibj.Victor;<a name="line.16"></a>
+<span class="sourceLineNo">010</span>import edu.wpi.first.wpilibj.DigitalInput;<a name="line.10"></a>
+<span class="sourceLineNo">011</span>import edu.wpi.first.wpilibj.Encoder;<a name="line.11"></a>
+<span class="sourceLineNo">012</span>import edu.wpi.first.wpilibj.IterativeRobot;<a name="line.12"></a>
+<span class="sourceLineNo">013</span>import edu.wpi.first.wpilibj.Joystick;<a name="line.13"></a>
+<span class="sourceLineNo">014</span>import edu.wpi.first.wpilibj.Solenoid;<a name="line.14"></a>
+<span class="sourceLineNo">015</span>import edu.wpi.first.wpilibj.DoubleSolenoid;<a name="line.15"></a>
+<span class="sourceLineNo">016</span>import edu.wpi.first.wpilibj.Talon;<a name="line.16"></a>
 <span class="sourceLineNo">017</span>import edu.wpi.first.wpilibj.networktables.NetworkTable;<a name="line.17"></a>
 <span class="sourceLineNo">018</span><a name="line.18"></a>
 <span class="sourceLineNo">019</span>/**<a name="line.19"></a>
@@ -41,523 +41,503 @@
 <span class="sourceLineNo">033</span>    Talon LeftMotor_2;<a name="line.33"></a>
 <span class="sourceLineNo">034</span>    Talon RightMotor_1;<a name="line.34"></a>
 <span class="sourceLineNo">035</span>    Talon RightMotor_2;<a name="line.35"></a>
-<span class="sourceLineNo">036</span>    Victor CollectorMotor;<a name="line.36"></a>
+<span class="sourceLineNo">036</span>    Talon CollectorMotor;<a name="line.36"></a>
 <span class="sourceLineNo">037</span>    Talon ShooterMotor;<a name="line.37"></a>
-<span class="sourceLineNo">038</span>    DoubleSolenoid Jaws;<a name="line.38"></a>
-<span class="sourceLineNo">039</span>    DoubleSolenoid Rotator;<a name="line.39"></a>
-<span class="sourceLineNo">040</span>    Joystick stick;<a name="line.40"></a>
-<span class="sourceLineNo">041</span>    Joystick CoOpstick;<a name="line.41"></a>
-<span class="sourceLineNo">042</span>    Encoder LeftEncoder;<a name="line.42"></a>
-<span class="sourceLineNo">043</span>    Encoder RightEncoder;<a name="line.43"></a>
-<span class="sourceLineNo">044</span>    SmartDashboardData SDD;<a name="line.44"></a>
-<span class="sourceLineNo">045</span>    NetworkTable table;<a name="line.45"></a>
-<span class="sourceLineNo">046</span>    Compressor Compressor;<a name="line.46"></a>
-<span class="sourceLineNo">047</span><a name="line.47"></a>
-<span class="sourceLineNo">048</span>    boolean IsTargetDistance;<a name="line.48"></a>
-<span class="sourceLineNo">049</span>    double TargetDistanceL;<a name="line.49"></a>
-<span class="sourceLineNo">050</span>    double TargetDistanceR;<a name="line.50"></a>
-<span class="sourceLineNo">051</span>    double TargetRateL;<a name="line.51"></a>
-<span class="sourceLineNo">052</span>    double TargetRateR;<a name="line.52"></a>
-<span class="sourceLineNo">053</span>    double LeftCmd;<a name="line.53"></a>
-<span class="sourceLineNo">054</span>    double RightCmd;<a name="line.54"></a>
-<span class="sourceLineNo">055</span>    double Speed;<a name="line.55"></a>
-<span class="sourceLineNo">056</span>    double Turn;<a name="line.56"></a>
-<span class="sourceLineNo">057</span>    boolean RCMode;<a name="line.57"></a>
-<span class="sourceLineNo">058</span>    boolean PRCMode;<a name="line.58"></a>
-<span class="sourceLineNo">059</span>    boolean Pbutton11;<a name="line.59"></a>
-<span class="sourceLineNo">060</span>    boolean AutonSwitch = false;<a name="line.60"></a>
-<span class="sourceLineNo">061</span>    /*<a name="line.61"></a>
-<span class="sourceLineNo">062</span>     * Enumerated Constants don't work with this version of Java (1.4) so these<a name="line.62"></a>
-<span class="sourceLineNo">063</span>     * serve as the enumerated constants for the Autonomous state machine.<a name="line.63"></a>
-<span class="sourceLineNo">064</span>     */<a name="line.64"></a>
-<span class="sourceLineNo">065</span><a name="line.65"></a>
-<span class="sourceLineNo">066</span>    int AutonMode;<a name="line.66"></a>
-<span class="sourceLineNo">067</span>    final int CLAMP_1 = 9;<a name="line.67"></a>
-<span class="sourceLineNo">068</span>    final int FORWARD_1 = 1;<a name="line.68"></a>
-<span class="sourceLineNo">069</span>    final int SHOOT_1 = 2;<a name="line.69"></a>
-<span class="sourceLineNo">070</span>    final int BACKWARD_1 = 3;<a name="line.70"></a>
-<span class="sourceLineNo">071</span>    final int TURN_RIGHT_90 = 4;<a name="line.71"></a>
-<span class="sourceLineNo">072</span>    final int COLLECT_BALL = 5;<a name="line.72"></a>
-<span class="sourceLineNo">073</span>    final int TURN_LEFT_90 = 6;<a name="line.73"></a>
-<span class="sourceLineNo">074</span>    final int FORWARD_2 = 7;<a name="line.74"></a>
-<span class="sourceLineNo">075</span>    final int SHOOT_2 = 8;<a name="line.75"></a>
+<span class="sourceLineNo">038</span><a name="line.38"></a>
+<span class="sourceLineNo">039</span>    Solenoid Shifter;<a name="line.39"></a>
+<span class="sourceLineNo">040</span>    Solenoid ShooterHolder;<a name="line.40"></a>
+<span class="sourceLineNo">041</span>    DoubleSolenoid Jaws;<a name="line.41"></a>
+<span class="sourceLineNo">042</span>    DoubleSolenoid Rotator;<a name="line.42"></a>
+<span class="sourceLineNo">043</span><a name="line.43"></a>
+<span class="sourceLineNo">044</span>    Joystick stick;<a name="line.44"></a>
+<span class="sourceLineNo">045</span>    Joystick CoOpstick;<a name="line.45"></a>
+<span class="sourceLineNo">046</span><a name="line.46"></a>
+<span class="sourceLineNo">047</span>    Encoder LeftEncoder;<a name="line.47"></a>
+<span class="sourceLineNo">048</span>    Encoder RightEncoder;<a name="line.48"></a>
+<span class="sourceLineNo">049</span>    Encoder ShooterEncoder;<a name="line.49"></a>
+<span class="sourceLineNo">050</span>    <a name="line.50"></a>
+<span class="sourceLineNo">051</span>    Shooter Shooter;<a name="line.51"></a>
+<span class="sourceLineNo">052</span><a name="line.52"></a>
+<span class="sourceLineNo">053</span>    DigitalInput AutonOverride;<a name="line.53"></a>
+<span class="sourceLineNo">054</span><a name="line.54"></a>
+<span class="sourceLineNo">055</span>    SmartDashboardData SDD;<a name="line.55"></a>
+<span class="sourceLineNo">056</span><a name="line.56"></a>
+<span class="sourceLineNo">057</span>    NetworkTable table;<a name="line.57"></a>
+<span class="sourceLineNo">058</span><a name="line.58"></a>
+<span class="sourceLineNo">059</span>    Compressor Compressor;<a name="line.59"></a>
+<span class="sourceLineNo">060</span><a name="line.60"></a>
+<span class="sourceLineNo">061</span>    double TargetDistanceL;<a name="line.61"></a>
+<span class="sourceLineNo">062</span>    double TargetDistanceR;<a name="line.62"></a>
+<span class="sourceLineNo">063</span>    double TargetRateL;<a name="line.63"></a>
+<span class="sourceLineNo">064</span>    double TargetRateR;<a name="line.64"></a>
+<span class="sourceLineNo">065</span>    double LeftCmd;<a name="line.65"></a>
+<span class="sourceLineNo">066</span>    double RightCmd;<a name="line.66"></a>
+<span class="sourceLineNo">067</span>    double Speed;<a name="line.67"></a>
+<span class="sourceLineNo">068</span>    double Turn;<a name="line.68"></a>
+<span class="sourceLineNo">069</span>    double PrevErrorL;<a name="line.69"></a>
+<span class="sourceLineNo">070</span>    double PrevErrorR;<a name="line.70"></a>
+<span class="sourceLineNo">071</span><a name="line.71"></a>
+<span class="sourceLineNo">072</span>    boolean RCMode;<a name="line.72"></a>
+<span class="sourceLineNo">073</span>    boolean PRCMode;<a name="line.73"></a>
+<span class="sourceLineNo">074</span>    boolean PrevButton7;<a name="line.74"></a>
+<span class="sourceLineNo">075</span>    boolean AutonSwitch = false;<a name="line.75"></a>
 <span class="sourceLineNo">076</span><a name="line.76"></a>
-<span class="sourceLineNo">077</span>    int TimerCount;<a name="line.77"></a>
-<span class="sourceLineNo">078</span><a name="line.78"></a>
-<span class="sourceLineNo">079</span>    /**<a name="line.79"></a>
-<span class="sourceLineNo">080</span>     * This function is run when the robot is first started up and should be<a name="line.80"></a>
-<span class="sourceLineNo">081</span>     * used for any initialization code.<a name="line.81"></a>
-<span class="sourceLineNo">082</span>     */<a name="line.82"></a>
-<span class="sourceLineNo">083</span>    public void robotInit() {<a name="line.83"></a>
-<span class="sourceLineNo">084</span>        LeftMotor_1 = new Talon(PWM_LEFT_MOTOR_1);<a name="line.84"></a>
-<span class="sourceLineNo">085</span>        LeftMotor_2 = new Talon(PWM_LEFT_MOTOR_2);<a name="line.85"></a>
-<span class="sourceLineNo">086</span>        RightMotor_1 = new Talon(PWM_RIGHT_MOTOR_1);<a name="line.86"></a>
-<span class="sourceLineNo">087</span>        RightMotor_2 = new Talon(PWM_RIGHT_MOTOR_2);<a name="line.87"></a>
-<span class="sourceLineNo">088</span>        CollectorMotor = new Victor(PWM_COLLECTOR_MOTOR);<a name="line.88"></a>
-<span class="sourceLineNo">089</span>        Jaws = new DoubleSolenoid(SOLENOID_JAWS_CLOSE, SOLENOID_JAWS_OPEN);<a name="line.89"></a>
-<span class="sourceLineNo">090</span>        Rotator = new DoubleSolenoid(SOLENOID_ROTATOR_UP, SOLENOID_ROTATOR_DOWN);<a name="line.90"></a>
-<span class="sourceLineNo">091</span>        stick = new Joystick(1);<a name="line.91"></a>
-<span class="sourceLineNo">092</span>        CoOpstick = new Joystick(2);<a name="line.92"></a>
-<span class="sourceLineNo">093</span>        LeftEncoder = new Encoder(DIO_LEFT_ENCODER_ACHANNEL, DIO_LEFT_ENCODER_BCHANNEL);<a name="line.93"></a>
-<span class="sourceLineNo">094</span>        RightEncoder = new Encoder(DIO_RIGHT_ENCODER_ACHANNEL, DIO_RIGHT_ENCODER_BCHANNEL);<a name="line.94"></a>
-<span class="sourceLineNo">095</span>        SDD = new SmartDashboardData();<a name="line.95"></a>
-<span class="sourceLineNo">096</span>        table = NetworkTable.getTable("datatable");<a name="line.96"></a>
-<span class="sourceLineNo">097</span>        Compressor = new Compressor(DIO_PRESSURE_SWITCH, RELAY_COMPRESSOR);<a name="line.97"></a>
-<span class="sourceLineNo">098</span>        Compressor.start();<a name="line.98"></a>
-<span class="sourceLineNo">099</span>        jawsRelax();<a name="line.99"></a>
-<span class="sourceLineNo">100</span><a name="line.100"></a>
-<span class="sourceLineNo">101</span>        /*<a name="line.101"></a>
-<span class="sourceLineNo">102</span>         * One Encoder pulse is approximately 1/28 inches.<a name="line.102"></a>
-<span class="sourceLineNo">103</span>         */<a name="line.103"></a>
-<span class="sourceLineNo">104</span>        LeftEncoder.setDistancePerPulse(0.0514285714285714);<a name="line.104"></a>
-<span class="sourceLineNo">105</span>        RightEncoder.setDistancePerPulse(0.0514285714285714);<a name="line.105"></a>
-<span class="sourceLineNo">106</span>        LeftEncoder.start();<a name="line.106"></a>
-<span class="sourceLineNo">107</span>        RightEncoder.start();<a name="line.107"></a>
-<span class="sourceLineNo">108</span>    }<a name="line.108"></a>
+<span class="sourceLineNo">077</span>    /**<a name="line.77"></a>
+<span class="sourceLineNo">078</span>     * This function is run when the robot is first started up and should be<a name="line.78"></a>
+<span class="sourceLineNo">079</span>     * used for any initialization code.<a name="line.79"></a>
+<span class="sourceLineNo">080</span>     */<a name="line.80"></a>
+<span class="sourceLineNo">081</span>    public void robotInit() {<a name="line.81"></a>
+<span class="sourceLineNo">082</span>        LeftMotor_1 = new Talon(PWM_LEFT_MOTOR_1);<a name="line.82"></a>
+<span class="sourceLineNo">083</span>        LeftMotor_2 = new Talon(PWM_LEFT_MOTOR_2);<a name="line.83"></a>
+<span class="sourceLineNo">084</span>        RightMotor_1 = new Talon(PWM_RIGHT_MOTOR_1);<a name="line.84"></a>
+<span class="sourceLineNo">085</span>        RightMotor_2 = new Talon(PWM_RIGHT_MOTOR_2);<a name="line.85"></a>
+<span class="sourceLineNo">086</span>        ShooterMotor = new Talon(PWM_SHOOTER_MOTOR);<a name="line.86"></a>
+<span class="sourceLineNo">087</span>        CollectorMotor = new Talon(PWM_COLLECTOR_MOTOR);<a name="line.87"></a>
+<span class="sourceLineNo">088</span><a name="line.88"></a>
+<span class="sourceLineNo">089</span>        Shifter = new Solenoid(SOLENOID_SHIFTERS);<a name="line.89"></a>
+<span class="sourceLineNo">090</span>        ShooterHolder = new Solenoid(SOLENOID_SHOOTER_HOLDER);<a name="line.90"></a>
+<span class="sourceLineNo">091</span>        Jaws = new DoubleSolenoid(SOLENOID_JAWS_CLOSE, SOLENOID_JAWS_OPEN);<a name="line.91"></a>
+<span class="sourceLineNo">092</span>        Rotator = new DoubleSolenoid(SOLENOID_ROTATOR_UP, SOLENOID_ROTATOR_DOWN);<a name="line.92"></a>
+<span class="sourceLineNo">093</span>        Shooter = new Shooter(Jaws, ShooterHolder, ShooterMotor, ShooterEncoder, CoOpstick, SHOOTER_OVERRIDE);<a name="line.93"></a>
+<span class="sourceLineNo">094</span><a name="line.94"></a>
+<span class="sourceLineNo">095</span>        stick = new Joystick(1);<a name="line.95"></a>
+<span class="sourceLineNo">096</span>        CoOpstick = new Joystick(2);<a name="line.96"></a>
+<span class="sourceLineNo">097</span><a name="line.97"></a>
+<span class="sourceLineNo">098</span>        LeftEncoder = new Encoder(DIO_LEFT_ENCODER_ACHANNEL, DIO_LEFT_ENCODER_BCHANNEL);<a name="line.98"></a>
+<span class="sourceLineNo">099</span>        RightEncoder = new Encoder(DIO_RIGHT_ENCODER_ACHANNEL, DIO_RIGHT_ENCODER_BCHANNEL);<a name="line.99"></a>
+<span class="sourceLineNo">100</span>        ShooterEncoder = new Encoder(DIO_SHOOTER_ENCODER_ACHANNEL, DIO_SHOOTER_ENCODER_BCHANNEL);<a name="line.100"></a>
+<span class="sourceLineNo">101</span>        AutonOverride = new DigitalInput(DIO_AUTON_SWITCH);<a name="line.101"></a>
+<span class="sourceLineNo">102</span><a name="line.102"></a>
+<span class="sourceLineNo">103</span>        SDD = new SmartDashboardData();<a name="line.103"></a>
+<span class="sourceLineNo">104</span><a name="line.104"></a>
+<span class="sourceLineNo">105</span>        table = NetworkTable.getTable("datatable");<a name="line.105"></a>
+<span class="sourceLineNo">106</span><a name="line.106"></a>
+<span class="sourceLineNo">107</span>        Compressor = new Compressor(DIO_PRESSURE_SWITCH, RELAY_COMPRESSOR);<a name="line.107"></a>
+<span class="sourceLineNo">108</span>        Compressor.start();<a name="line.108"></a>
 <span class="sourceLineNo">109</span><a name="line.109"></a>
-<span class="sourceLineNo">110</span>    /**<a name="line.110"></a>
-<span class="sourceLineNo">111</span>     * This function is called once before autonomous and should be used for any<a name="line.111"></a>
-<span class="sourceLineNo">112</span>     * initialization code.<a name="line.112"></a>
-<span class="sourceLineNo">113</span>     */ <a name="line.113"></a>
-<span class="sourceLineNo">114</span>    double PrevErrorL;<a name="line.114"></a>
-<span class="sourceLineNo">115</span>    double PrevErrorR;<a name="line.115"></a>
-<span class="sourceLineNo">116</span>    <a name="line.116"></a>
-<span class="sourceLineNo">117</span>    public void autonomousInit() {<a name="line.117"></a>
-<span class="sourceLineNo">118</span>        LeftEncoder.reset();<a name="line.118"></a>
-<span class="sourceLineNo">119</span>        RightEncoder.reset();<a name="line.119"></a>
+<span class="sourceLineNo">110</span>        /*<a name="line.110"></a>
+<span class="sourceLineNo">111</span>         * One Encoder pulse is approximately 1/20 inches.<a name="line.111"></a>
+<span class="sourceLineNo">112</span>         */<a name="line.112"></a>
+<span class="sourceLineNo">113</span>        LeftEncoder.setDistancePerPulse(0.0514285714285714);<a name="line.113"></a>
+<span class="sourceLineNo">114</span>        RightEncoder.setDistancePerPulse(0.0514285714285714);<a name="line.114"></a>
+<span class="sourceLineNo">115</span>        ShooterEncoder.setDistancePerPulse(0.9);<a name="line.115"></a>
+<span class="sourceLineNo">116</span><a name="line.116"></a>
+<span class="sourceLineNo">117</span>        LeftEncoder.start();<a name="line.117"></a>
+<span class="sourceLineNo">118</span>        RightEncoder.start();<a name="line.118"></a>
+<span class="sourceLineNo">119</span>        ShooterEncoder.start();<a name="line.119"></a>
 <span class="sourceLineNo">120</span><a name="line.120"></a>
-<span class="sourceLineNo">121</span>        IsTargetDistance = false; //not used yet<a name="line.121"></a>
-<span class="sourceLineNo">122</span>        TargetRateL = 237.3214285714286;<a name="line.122"></a>
-<span class="sourceLineNo">123</span>        TargetRateR = 158.2142857142857; //Approximately 100% motor power<a name="line.123"></a>
-<span class="sourceLineNo">124</span>        TargetDistanceL = 155;<a name="line.124"></a>
-<span class="sourceLineNo">125</span>        TargetDistanceR = 155; //156 is 15 ft<a name="line.125"></a>
-<span class="sourceLineNo">126</span>        <a name="line.126"></a>
-<span class="sourceLineNo">127</span>        AutonMode = CLAMP_1;<a name="line.127"></a>
-<span class="sourceLineNo">128</span>        LeftCmd = 0;<a name="line.128"></a>
-<span class="sourceLineNo">129</span>        RightCmd = 0;<a name="line.129"></a>
-<span class="sourceLineNo">130</span>        Jaws.set(DoubleSolenoid.Value.kReverse);<a name="line.130"></a>
-<span class="sourceLineNo">131</span>        <a name="line.131"></a>
-<span class="sourceLineNo">132</span>        PrevErrorL = 0;<a name="line.132"></a>
-<span class="sourceLineNo">133</span>        PrevErrorR = 0;<a name="line.133"></a>
-<span class="sourceLineNo">134</span>        TimerCount = 0;<a name="line.134"></a>
-<span class="sourceLineNo">135</span>    }<a name="line.135"></a>
-<span class="sourceLineNo">136</span><a name="line.136"></a>
-<span class="sourceLineNo">137</span>    /**<a name="line.137"></a>
-<span class="sourceLineNo">138</span>     * This function is called periodically during autonomous<a name="line.138"></a>
-<span class="sourceLineNo">139</span>     */<a name="line.139"></a>
-<span class="sourceLineNo">140</span>    public void autonomousPeriodic() {<a name="line.140"></a>
-<span class="sourceLineNo">141</span><a name="line.141"></a>
-<span class="sourceLineNo">142</span>        /*<a name="line.142"></a>
-<span class="sourceLineNo">143</span>         * Percent error to be used for Proportional control of the motors.<a name="line.143"></a>
-<span class="sourceLineNo">144</span>         */<a name="line.144"></a>
-<span class="sourceLineNo">145</span>       <a name="line.145"></a>
-<span class="sourceLineNo">146</span>        <a name="line.146"></a>
-<span class="sourceLineNo">147</span>        double PrateL = (TargetRateL - LeftEncoder.getRate()) / TargetRateL;<a name="line.147"></a>
-<span class="sourceLineNo">148</span>        double PrateR = (TargetRateR - RightEncoder.getRate()) / TargetRateR;<a name="line.148"></a>
-<span class="sourceLineNo">149</span>        double DeltaDistance = LeftEncoder.getDistance() - RightEncoder.getDistance();<a name="line.149"></a>
+<span class="sourceLineNo">121</span>        jawsRelax();<a name="line.121"></a>
+<span class="sourceLineNo">122</span>        Shooter.init();<a name="line.122"></a>
+<span class="sourceLineNo">123</span>        driveInit();<a name="line.123"></a>
+<span class="sourceLineNo">124</span>    }<a name="line.124"></a>
+<span class="sourceLineNo">125</span><a name="line.125"></a>
+<span class="sourceLineNo">126</span>    /*<a name="line.126"></a>
+<span class="sourceLineNo">127</span>     * Enumerated Constants don't work with this version of Java (ME 1.4) so these<a name="line.127"></a>
+<span class="sourceLineNo">128</span>     * serve as the enumerated constants for the Autonomous state machine.<a name="line.128"></a>
+<span class="sourceLineNo">129</span>     */<a name="line.129"></a>
+<span class="sourceLineNo">130</span>    int AutonMode;<a name="line.130"></a>
+<span class="sourceLineNo">131</span>    final int CLAMP_1 = 9;<a name="line.131"></a>
+<span class="sourceLineNo">132</span>    final int FORWARD_1 = 1;<a name="line.132"></a>
+<span class="sourceLineNo">133</span>    final int SHOOT_1 = 2;<a name="line.133"></a>
+<span class="sourceLineNo">134</span>    final int BACKWARD_1 = 3;<a name="line.134"></a>
+<span class="sourceLineNo">135</span>    final int TURN_RIGHT_90 = 4;<a name="line.135"></a>
+<span class="sourceLineNo">136</span>    final int COLLECT_BALL = 5;<a name="line.136"></a>
+<span class="sourceLineNo">137</span>    final int TURN_LEFT_90 = 6;<a name="line.137"></a>
+<span class="sourceLineNo">138</span>    final int FORWARD_2 = 7;<a name="line.138"></a>
+<span class="sourceLineNo">139</span>    final int SHOOT_2 = 8;<a name="line.139"></a>
+<span class="sourceLineNo">140</span><a name="line.140"></a>
+<span class="sourceLineNo">141</span>    int TimerCount;<a name="line.141"></a>
+<span class="sourceLineNo">142</span><a name="line.142"></a>
+<span class="sourceLineNo">143</span>    /**<a name="line.143"></a>
+<span class="sourceLineNo">144</span>     * This function is called once before autonomous and should be used for any<a name="line.144"></a>
+<span class="sourceLineNo">145</span>     * initialization code.<a name="line.145"></a>
+<span class="sourceLineNo">146</span>     */<a name="line.146"></a>
+<span class="sourceLineNo">147</span>    public void autonomousInit() {<a name="line.147"></a>
+<span class="sourceLineNo">148</span>        LeftEncoder.reset();<a name="line.148"></a>
+<span class="sourceLineNo">149</span>        RightEncoder.reset();<a name="line.149"></a>
 <span class="sourceLineNo">150</span><a name="line.150"></a>
-<span class="sourceLineNo">151</span>        double PdistanceL = ((TargetDistanceL - LeftEncoder.getDistance()) / TargetDistanceL);<a name="line.151"></a>
-<span class="sourceLineNo">152</span>        double PdistanceR = ((TargetDistanceR - RightEncoder.getDistance()) / TargetDistanceR);<a name="line.152"></a>
-<span class="sourceLineNo">153</span>        <a name="line.153"></a>
-<span class="sourceLineNo">154</span>        double IdistanceL = PdistanceL + PrevErrorL;<a name="line.154"></a>
-<span class="sourceLineNo">155</span>        double IdistanceR = PdistanceR + PrevErrorR;<a name="line.155"></a>
-<span class="sourceLineNo">156</span>        <a name="line.156"></a>
-<span class="sourceLineNo">157</span>        <a name="line.157"></a>
-<span class="sourceLineNo">158</span>        <a name="line.158"></a>
-<span class="sourceLineNo">159</span>        <a name="line.159"></a>
-<span class="sourceLineNo">160</span>        <a name="line.160"></a>
-<span class="sourceLineNo">161</span>        <a name="line.161"></a>
-<span class="sourceLineNo">162</span>        <a name="line.162"></a>
-<span class="sourceLineNo">163</span>        <a name="line.163"></a>
-<span class="sourceLineNo">164</span>        <a name="line.164"></a>
-<span class="sourceLineNo">165</span>        <a name="line.165"></a>
-<span class="sourceLineNo">166</span>        /*<a name="line.166"></a>
-<span class="sourceLineNo">167</span>         *TODO: reduce to 5 cases<a name="line.167"></a>
-<span class="sourceLineNo">168</span>         */<a name="line.168"></a>
-<span class="sourceLineNo">169</span>        switch(AutonMode){<a name="line.169"></a>
-<span class="sourceLineNo">170</span>            case CLAMP_1: {<a name="line.170"></a>
-<span class="sourceLineNo">171</span>                if(TimerCount &lt; 100) {<a name="line.171"></a>
-<span class="sourceLineNo">172</span>                Jaws.set(DoubleSolenoid.Value.kReverse);<a name="line.172"></a>
-<span class="sourceLineNo">173</span>                rotateDown();<a name="line.173"></a>
-<span class="sourceLineNo">174</span>                CollectorMotor.set(-1);<a name="line.174"></a>
-<span class="sourceLineNo">175</span>                TimerCount++;<a name="line.175"></a>
-<span class="sourceLineNo">176</span>                } else {<a name="line.176"></a>
-<span class="sourceLineNo">177</span>                    TimerCount = 0;<a name="line.177"></a>
-<span class="sourceLineNo">178</span>                    <a name="line.178"></a>
-<span class="sourceLineNo">179</span>                    AutonMode = FORWARD_1;<a name="line.179"></a>
-<span class="sourceLineNo">180</span>                }<a name="line.180"></a>
-<span class="sourceLineNo">181</span>                break;<a name="line.181"></a>
-<span class="sourceLineNo">182</span>            }<a name="line.182"></a>
-<span class="sourceLineNo">183</span>            //Drive forward<a name="line.183"></a>
-<span class="sourceLineNo">184</span>            case FORWARD_1: {<a name="line.184"></a>
-<span class="sourceLineNo">185</span>            if (LeftEncoder.getDistance() &lt; 155 &amp;&amp; RightEncoder.getDistance() &lt; 155) {<a name="line.185"></a>
-<span class="sourceLineNo">186</span>                <a name="line.186"></a>
-<span class="sourceLineNo">187</span>                LeftCmd =  0.9 * PdistanceL + 0.001 * IdistanceL;<a name="line.187"></a>
-<span class="sourceLineNo">188</span>                RightCmd = 1.0625 * PdistanceR + 0.001 * IdistanceR;<a name="line.188"></a>
-<span class="sourceLineNo">189</span>            /*<a name="line.189"></a>
-<span class="sourceLineNo">190</span>            if (TimerCount &lt; 50) {<a name="line.190"></a>
-<span class="sourceLineNo">191</span>                LeftCmd = 0.45;<a name="line.191"></a>
-<span class="sourceLineNo">192</span>                RightCmd = 0.45;<a name="line.192"></a>
-<span class="sourceLineNo">193</span>                TimerCount++;<a name="line.193"></a>
-<span class="sourceLineNo">194</span>            */<a name="line.194"></a>
-<span class="sourceLineNo">195</span>            } else {<a name="line.195"></a>
-<span class="sourceLineNo">196</span>                LeftCmd = 0;<a name="line.196"></a>
-<span class="sourceLineNo">197</span>                RightCmd = 0;<a name="line.197"></a>
-<span class="sourceLineNo">198</span>                <a name="line.198"></a>
-<span class="sourceLineNo">199</span>                LeftEncoder.reset();<a name="line.199"></a>
-<span class="sourceLineNo">200</span>                RightEncoder.reset();<a name="line.200"></a>
-<span class="sourceLineNo">201</span>                <a name="line.201"></a>
-<span class="sourceLineNo">202</span>                TimerCount = 0;<a name="line.202"></a>
-<span class="sourceLineNo">203</span>                AutonMode = SHOOT_1;<a name="line.203"></a>
-<span class="sourceLineNo">204</span>                }<a name="line.204"></a>
-<span class="sourceLineNo">205</span>            break;<a name="line.205"></a>
-<span class="sourceLineNo">206</span>            } <a name="line.206"></a>
-<span class="sourceLineNo">207</span>            //Shoot the first ball. Dumps ball by running collector motor backwards.<a name="line.207"></a>
-<span class="sourceLineNo">208</span>            case SHOOT_1: {<a name="line.208"></a>
-<span class="sourceLineNo">209</span>                if (TimerCount &lt; 100){<a name="line.209"></a>
-<span class="sourceLineNo">210</span>                    CollectorMotor.set(1);<a name="line.210"></a>
-<span class="sourceLineNo">211</span>                    LeftCmd = 0.15;<a name="line.211"></a>
-<span class="sourceLineNo">212</span>                    RightCmd = 0.15;<a name="line.212"></a>
-<span class="sourceLineNo">213</span>                    TimerCount++;<a name="line.213"></a>
-<span class="sourceLineNo">214</span>                } else {<a name="line.214"></a>
-<span class="sourceLineNo">215</span>                    TimerCount = 0;<a name="line.215"></a>
-<span class="sourceLineNo">216</span>                    CollectorMotor.set(0);<a name="line.216"></a>
-<span class="sourceLineNo">217</span>                    LeftCmd = 0;<a name="line.217"></a>
-<span class="sourceLineNo">218</span>                    RightCmd = 0;<a name="line.218"></a>
-<span class="sourceLineNo">219</span>                    <a name="line.219"></a>
-<span class="sourceLineNo">220</span>                    LeftEncoder.reset();<a name="line.220"></a>
-<span class="sourceLineNo">221</span>                    RightEncoder.reset();<a name="line.221"></a>
-<span class="sourceLineNo">222</span>                    <a name="line.222"></a>
-<span class="sourceLineNo">223</span>                    IdistanceL = PrevErrorL = 0;<a name="line.223"></a>
-<span class="sourceLineNo">224</span>                    IdistanceR = PrevErrorR = 0;<a name="line.224"></a>
-<span class="sourceLineNo">225</span>                    <a name="line.225"></a>
-<span class="sourceLineNo">226</span>                    TargetDistanceL = -102;<a name="line.226"></a>
-<span class="sourceLineNo">227</span>                    TargetDistanceR = -156;<a name="line.227"></a>
-<span class="sourceLineNo">228</span>                    if(AutonSwitch) {<a name="line.228"></a>
-<span class="sourceLineNo">229</span>                        AutonMode = BACKWARD_1;<a name="line.229"></a>
-<span class="sourceLineNo">230</span>                    } else AutonMode = 0;<a name="line.230"></a>
-<span class="sourceLineNo">231</span>                }<a name="line.231"></a>
-<span class="sourceLineNo">232</span>                break;<a name="line.232"></a>
-<span class="sourceLineNo">233</span>            } <a name="line.233"></a>
-<span class="sourceLineNo">234</span>            //Drive backward<a name="line.234"></a>
-<span class="sourceLineNo">235</span>            case BACKWARD_1: {<a name="line.235"></a>
-<span class="sourceLineNo">236</span>                if (LeftEncoder.getDistance() &gt;= -102 || RightEncoder.getDistance() &gt;= -156){<a name="line.236"></a>
-<span class="sourceLineNo">237</span>                    LeftCmd =  0.9 * PdistanceL + 0.001 * IdistanceL;<a name="line.237"></a>
-<span class="sourceLineNo">238</span>                    RightCmd = 1.0625 * PdistanceR + 0.001 * IdistanceR;<a name="line.238"></a>
-<span class="sourceLineNo">239</span>                } else {<a name="line.239"></a>
-<span class="sourceLineNo">240</span>                    TimerCount = 0;<a name="line.240"></a>
-<span class="sourceLineNo">241</span>                    <a name="line.241"></a>
-<span class="sourceLineNo">242</span>                    LeftEncoder.reset();<a name="line.242"></a>
-<span class="sourceLineNo">243</span>                    RightEncoder.reset();<a name="line.243"></a>
-<span class="sourceLineNo">244</span>                    <a name="line.244"></a>
-<span class="sourceLineNo">245</span>                    IdistanceL = PrevErrorL = 0;<a name="line.245"></a>
-<span class="sourceLineNo">246</span>                    IdistanceR = PrevErrorR = 0;<a name="line.246"></a>
-<span class="sourceLineNo">247</span>                    <a name="line.247"></a>
-<span class="sourceLineNo">248</span>                    TargetDistanceL = 10.52733075;<a name="line.248"></a>
-<span class="sourceLineNo">249</span>                    TargetDistanceR = -16.10066235;<a name="line.249"></a>
-<span class="sourceLineNo">250</span>                    <a name="line.250"></a>
-<span class="sourceLineNo">251</span>                    if(AutonSwitch) {<a name="line.251"></a>
-<span class="sourceLineNo">252</span>                        AutonMode = TURN_RIGHT_90;<a name="line.252"></a>
-<span class="sourceLineNo">253</span>                    } else AutonMode = 0;<a name="line.253"></a>
-<span class="sourceLineNo">254</span>                    //LoL is fun<a name="line.254"></a>
-<span class="sourceLineNo">255</span>                    //^Message from Kyle<a name="line.255"></a>
-<span class="sourceLineNo">256</span>                }<a name="line.256"></a>
-<span class="sourceLineNo">257</span>                break;<a name="line.257"></a>
-<span class="sourceLineNo">258</span>            } <a name="line.258"></a>
-<span class="sourceLineNo">259</span>            //Turn right 90 degrees<a name="line.259"></a>
-<span class="sourceLineNo">260</span>            case TURN_RIGHT_90: {<a name="line.260"></a>
-<span class="sourceLineNo">261</span>                boolean IsTargetDistanceL = false;<a name="line.261"></a>
-<span class="sourceLineNo">262</span>                boolean IsTargetDistanceR = false;<a name="line.262"></a>
-<span class="sourceLineNo">263</span>                <a name="line.263"></a>
-<span class="sourceLineNo">264</span>                if(LeftEncoder.getDistance() &lt;= TargetDistanceL){<a name="line.264"></a>
-<span class="sourceLineNo">265</span>                    LeftCmd = 0.9 * PdistanceL + 0.001 * IdistanceL;<a name="line.265"></a>
-<span class="sourceLineNo">266</span>                } else {<a name="line.266"></a>
-<span class="sourceLineNo">267</span>                    IsTargetDistanceL = true;<a name="line.267"></a>
-<span class="sourceLineNo">268</span>                    LeftCmd = 0;<a name="line.268"></a>
-<span class="sourceLineNo">269</span>                }<a name="line.269"></a>
-<span class="sourceLineNo">270</span>                <a name="line.270"></a>
-<span class="sourceLineNo">271</span>                if(RightEncoder.getDistance() &gt;= TargetDistanceR ){<a name="line.271"></a>
-<span class="sourceLineNo">272</span>                    RightCmd = 1.0625 * PdistanceR + 0.001 * IdistanceR;<a name="line.272"></a>
-<span class="sourceLineNo">273</span>                } else {<a name="line.273"></a>
-<span class="sourceLineNo">274</span>                    IsTargetDistanceR = true;<a name="line.274"></a>
-<span class="sourceLineNo">275</span>                    RightCmd = 0;<a name="line.275"></a>
-<span class="sourceLineNo">276</span>                }<a name="line.276"></a>
-<span class="sourceLineNo">277</span>                <a name="line.277"></a>
-<span class="sourceLineNo">278</span>                if (IsTargetDistanceL &amp;&amp; IsTargetDistanceR){<a name="line.278"></a>
-<span class="sourceLineNo">279</span>                    TimerCount = 0;<a name="line.279"></a>
-<span class="sourceLineNo">280</span>                    LeftEncoder.reset();<a name="line.280"></a>
-<span class="sourceLineNo">281</span>                    RightEncoder.reset();<a name="line.281"></a>
-<span class="sourceLineNo">282</span>                    AutonMode = COLLECT_BALL;<a name="line.282"></a>
-<span class="sourceLineNo">283</span>                }<a name="line.283"></a>
-<span class="sourceLineNo">284</span>                break;<a name="line.284"></a>
-<span class="sourceLineNo">285</span>            } <a name="line.285"></a>
-<span class="sourceLineNo">286</span>            //Grab a ball using whatever mechanism collects balls (no mechanism, so wait for 50 loops)<a name="line.286"></a>
-<span class="sourceLineNo">287</span>            case COLLECT_BALL: {<a name="line.287"></a>
-<span class="sourceLineNo">288</span>                if (TimerCount &lt; 50){<a name="line.288"></a>
-<span class="sourceLineNo">289</span>                    CollectorMotor.set(-1);<a name="line.289"></a>
-<span class="sourceLineNo">290</span>                    LeftCmd = 0.2;<a name="line.290"></a>
-<span class="sourceLineNo">291</span>                    RightCmd = 0.2;<a name="line.291"></a>
-<span class="sourceLineNo">292</span>                    TimerCount++;<a name="line.292"></a>
-<span class="sourceLineNo">293</span>                } else {<a name="line.293"></a>
-<span class="sourceLineNo">294</span>                    TimerCount = 0;<a name="line.294"></a>
-<span class="sourceLineNo">295</span>                    LeftEncoder.reset();<a name="line.295"></a>
-<span class="sourceLineNo">296</span>                    RightEncoder.reset();<a name="line.296"></a>
-<span class="sourceLineNo">297</span>                    <a name="line.297"></a>
-<span class="sourceLineNo">298</span>                    TargetDistanceL = -10.52733075;<a name="line.298"></a>
-<span class="sourceLineNo">299</span>                    TargetDistanceR = 16.10066235;<a name="line.299"></a>
-<span class="sourceLineNo">300</span>                    <a name="line.300"></a>
-<span class="sourceLineNo">301</span>                    LeftCmd = -0.45;<a name="line.301"></a>
-<span class="sourceLineNo">302</span>                    RightCmd = -0.45;<a name="line.302"></a>
-<span class="sourceLineNo">303</span>                    <a name="line.303"></a>
-<span class="sourceLineNo">304</span>                    AutonMode = TURN_LEFT_90;<a name="line.304"></a>
-<span class="sourceLineNo">305</span>                }<a name="line.305"></a>
+<span class="sourceLineNo">151</span>        if (!CoOpstick.getRawButton(AUTON_SHOOT_HIGH)) {<a name="line.151"></a>
+<span class="sourceLineNo">152</span>            TargetDistanceL = 204;<a name="line.152"></a>
+<span class="sourceLineNo">153</span>            TargetDistanceR = 204;<a name="line.153"></a>
+<span class="sourceLineNo">154</span>        } else {<a name="line.154"></a>
+<span class="sourceLineNo">155</span>            TargetDistanceL = 180;<a name="line.155"></a>
+<span class="sourceLineNo">156</span>            TargetDistanceR = 180; //180 is 15 ft<a name="line.156"></a>
+<span class="sourceLineNo">157</span>        }<a name="line.157"></a>
+<span class="sourceLineNo">158</span><a name="line.158"></a>
+<span class="sourceLineNo">159</span>        AutonMode = CLAMP_1;<a name="line.159"></a>
+<span class="sourceLineNo">160</span>        LeftCmd = 0;<a name="line.160"></a>
+<span class="sourceLineNo">161</span>        RightCmd = 0;<a name="line.161"></a>
+<span class="sourceLineNo">162</span>        jawsClose();<a name="line.162"></a>
+<span class="sourceLineNo">163</span>        rotateUp();<a name="line.163"></a>
+<span class="sourceLineNo">164</span><a name="line.164"></a>
+<span class="sourceLineNo">165</span>        PrevErrorL = 0;<a name="line.165"></a>
+<span class="sourceLineNo">166</span>        PrevErrorR = 0;<a name="line.166"></a>
+<span class="sourceLineNo">167</span>        TimerCount = 0;<a name="line.167"></a>
+<span class="sourceLineNo">168</span>    }<a name="line.168"></a>
+<span class="sourceLineNo">169</span><a name="line.169"></a>
+<span class="sourceLineNo">170</span>    /**<a name="line.170"></a>
+<span class="sourceLineNo">171</span>     * This function is called periodically during autonomous<a name="line.171"></a>
+<span class="sourceLineNo">172</span>     */<a name="line.172"></a>
+<span class="sourceLineNo">173</span>    public void autonomousPeriodic() {<a name="line.173"></a>
+<span class="sourceLineNo">174</span><a name="line.174"></a>
+<span class="sourceLineNo">175</span>        /*<a name="line.175"></a>
+<span class="sourceLineNo">176</span>         * Percent error to be used for Proportional rate control of the motors.<a name="line.176"></a>
+<span class="sourceLineNo">177</span>         */<a name="line.177"></a>
+<span class="sourceLineNo">178</span>        double PrateL = (TargetRateL - LeftEncoder.getRate()) / TargetRateL;<a name="line.178"></a>
+<span class="sourceLineNo">179</span>        double PrateR = (TargetRateR - RightEncoder.getRate()) / TargetRateR;<a name="line.179"></a>
+<span class="sourceLineNo">180</span>        /*<a name="line.180"></a>
+<span class="sourceLineNo">181</span>         * Difference in distance used to drive straight<a name="line.181"></a>
+<span class="sourceLineNo">182</span>         */<a name="line.182"></a>
+<span class="sourceLineNo">183</span>        double DeltaDistance = LeftEncoder.getDistance() - RightEncoder.getDistance();<a name="line.183"></a>
+<span class="sourceLineNo">184</span>        /*<a name="line.184"></a>
+<span class="sourceLineNo">185</span>         * Percent error to be used for Proportional distance control of the motors<a name="line.185"></a>
+<span class="sourceLineNo">186</span>         */<a name="line.186"></a>
+<span class="sourceLineNo">187</span>        double PdistanceL = ((TargetDistanceL - LeftEncoder.getDistance()) / Math.abs(TargetDistanceL));<a name="line.187"></a>
+<span class="sourceLineNo">188</span>        double PdistanceR = ((TargetDistanceR - RightEncoder.getDistance()) / Math.abs(TargetDistanceR));<a name="line.188"></a>
+<span class="sourceLineNo">189</span>        /*<a name="line.189"></a>
+<span class="sourceLineNo">190</span>         * Accumulated error to be used for Integral distance control of the motors<a name="line.190"></a>
+<span class="sourceLineNo">191</span>         */<a name="line.191"></a>
+<span class="sourceLineNo">192</span>        double IdistanceL = PdistanceL + PrevErrorL;<a name="line.192"></a>
+<span class="sourceLineNo">193</span>        double IdistanceR = PdistanceR + PrevErrorR;<a name="line.193"></a>
+<span class="sourceLineNo">194</span><a name="line.194"></a>
+<span class="sourceLineNo">195</span>        Shooter.periodic();<a name="line.195"></a>
+<span class="sourceLineNo">196</span><a name="line.196"></a>
+<span class="sourceLineNo">197</span>        /*<a name="line.197"></a>
+<span class="sourceLineNo">198</span>         *TODO: Fill the empty cases.<a name="line.198"></a>
+<span class="sourceLineNo">199</span>         */<a name="line.199"></a>
+<span class="sourceLineNo">200</span>        switch (AutonMode) {<a name="line.200"></a>
+<span class="sourceLineNo">201</span>            <a name="line.201"></a>
+<span class="sourceLineNo">202</span>            case CLAMP_1: {<a name="line.202"></a>
+<span class="sourceLineNo">203</span>                if (TimerCount &lt; 5) {<a name="line.203"></a>
+<span class="sourceLineNo">204</span>                    jawsClose();<a name="line.204"></a>
+<span class="sourceLineNo">205</span>                    if (!CoOpstick.getRawButton(AUTON_SHOOT_HIGH)) {<a name="line.205"></a>
+<span class="sourceLineNo">206</span>                        rotateUp();<a name="line.206"></a>
+<span class="sourceLineNo">207</span>                    } else {<a name="line.207"></a>
+<span class="sourceLineNo">208</span>                        rotateDown();<a name="line.208"></a>
+<span class="sourceLineNo">209</span>                    }<a name="line.209"></a>
+<span class="sourceLineNo">210</span>                    collectorMStop();<a name="line.210"></a>
+<span class="sourceLineNo">211</span>                    TimerCount++;<a name="line.211"></a>
+<span class="sourceLineNo">212</span>                } else {<a name="line.212"></a>
+<span class="sourceLineNo">213</span>                    TimerCount = 0;<a name="line.213"></a>
+<span class="sourceLineNo">214</span>                    AutonMode = FORWARD_1;<a name="line.214"></a>
+<span class="sourceLineNo">215</span>                }<a name="line.215"></a>
+<span class="sourceLineNo">216</span>                break;<a name="line.216"></a>
+<span class="sourceLineNo">217</span>            }<a name="line.217"></a>
+<span class="sourceLineNo">218</span>            <a name="line.218"></a>
+<span class="sourceLineNo">219</span>            //Drive forward<a name="line.219"></a>
+<span class="sourceLineNo">220</span>            case FORWARD_1: {<a name="line.220"></a>
+<span class="sourceLineNo">221</span>                if (LeftEncoder.getDistance() &lt; TargetDistanceL &amp;&amp; RightEncoder.getDistance() &lt; TargetDistanceR) {<a name="line.221"></a>
+<span class="sourceLineNo">222</span><a name="line.222"></a>
+<span class="sourceLineNo">223</span>                    LeftCmd = 0.75 - 0.15 * DeltaDistance;<a name="line.223"></a>
+<span class="sourceLineNo">224</span>                    RightCmd = 0.75 + 0.15 * DeltaDistance;<a name="line.224"></a>
+<span class="sourceLineNo">225</span><a name="line.225"></a>
+<span class="sourceLineNo">226</span>                } else {<a name="line.226"></a>
+<span class="sourceLineNo">227</span>                    LeftCmd = 0;<a name="line.227"></a>
+<span class="sourceLineNo">228</span>                    RightCmd = 0;<a name="line.228"></a>
+<span class="sourceLineNo">229</span><a name="line.229"></a>
+<span class="sourceLineNo">230</span>                    if (!CoOpstick.getRawButton(AUTON_SHOOT_HIGH)) {<a name="line.230"></a>
+<span class="sourceLineNo">231</span>                        jawsOpen();<a name="line.231"></a>
+<span class="sourceLineNo">232</span>                    } else {<a name="line.232"></a>
+<span class="sourceLineNo">233</span>                        jawsRelax();<a name="line.233"></a>
+<span class="sourceLineNo">234</span>                    }<a name="line.234"></a>
+<span class="sourceLineNo">235</span>                    TimerCount = 0;<a name="line.235"></a>
+<span class="sourceLineNo">236</span>                    AutonMode = SHOOT_1;<a name="line.236"></a>
+<span class="sourceLineNo">237</span>                }<a name="line.237"></a>
+<span class="sourceLineNo">238</span>                break;<a name="line.238"></a>
+<span class="sourceLineNo">239</span>            }<a name="line.239"></a>
+<span class="sourceLineNo">240</span>            <a name="line.240"></a>
+<span class="sourceLineNo">241</span>            //Shoot the first ball.<a name="line.241"></a>
+<span class="sourceLineNo">242</span>            case SHOOT_1: {<a name="line.242"></a>
+<span class="sourceLineNo">243</span>                if (TimerCount &lt; 100) {<a name="line.243"></a>
+<span class="sourceLineNo">244</span>                    if (!CoOpstick.getRawButton(AUTON_SHOOT_HIGH)) {<a name="line.244"></a>
+<span class="sourceLineNo">245</span>                        if (TimerCount == 25) {<a name="line.245"></a>
+<span class="sourceLineNo">246</span>                            Shooter.trigger();<a name="line.246"></a>
+<span class="sourceLineNo">247</span>                        }<a name="line.247"></a>
+<span class="sourceLineNo">248</span>                    } else {<a name="line.248"></a>
+<span class="sourceLineNo">249</span>                        collectorMSpit();<a name="line.249"></a>
+<span class="sourceLineNo">250</span>                        LeftCmd = 0.15;<a name="line.250"></a>
+<span class="sourceLineNo">251</span>                        RightCmd = 0.15;<a name="line.251"></a>
+<span class="sourceLineNo">252</span>                    }<a name="line.252"></a>
+<span class="sourceLineNo">253</span>                    TimerCount++;<a name="line.253"></a>
+<span class="sourceLineNo">254</span>                } else {<a name="line.254"></a>
+<span class="sourceLineNo">255</span>                    TimerCount = 0;<a name="line.255"></a>
+<span class="sourceLineNo">256</span>                    collectorMStop();<a name="line.256"></a>
+<span class="sourceLineNo">257</span>                    LeftCmd = 0;<a name="line.257"></a>
+<span class="sourceLineNo">258</span>                    RightCmd = 0;<a name="line.258"></a>
+<span class="sourceLineNo">259</span><a name="line.259"></a>
+<span class="sourceLineNo">260</span>                    IdistanceL = PrevErrorL = 0;<a name="line.260"></a>
+<span class="sourceLineNo">261</span>                    IdistanceR = PrevErrorR = 0;<a name="line.261"></a>
+<span class="sourceLineNo">262</span><a name="line.262"></a>
+<span class="sourceLineNo">263</span>                    TargetDistanceL = -132;<a name="line.263"></a>
+<span class="sourceLineNo">264</span>                    TargetDistanceR = -132;<a name="line.264"></a>
+<span class="sourceLineNo">265</span><a name="line.265"></a>
+<span class="sourceLineNo">266</span>                    LeftEncoder.reset();<a name="line.266"></a>
+<span class="sourceLineNo">267</span>                    RightEncoder.reset();<a name="line.267"></a>
+<span class="sourceLineNo">268</span><a name="line.268"></a>
+<span class="sourceLineNo">269</span>                    AutonMode = BACKWARD_1;<a name="line.269"></a>
+<span class="sourceLineNo">270</span>                }<a name="line.270"></a>
+<span class="sourceLineNo">271</span>                break;<a name="line.271"></a>
+<span class="sourceLineNo">272</span>            }<a name="line.272"></a>
+<span class="sourceLineNo">273</span>            <a name="line.273"></a>
+<span class="sourceLineNo">274</span>            //Drive backward<a name="line.274"></a>
+<span class="sourceLineNo">275</span>            case BACKWARD_1: {<a name="line.275"></a>
+<span class="sourceLineNo">276</span>                if (LeftEncoder.getDistance() &gt;= TargetDistanceL || RightEncoder.getDistance() &gt;= TargetDistanceR) {<a name="line.276"></a>
+<span class="sourceLineNo">277</span>                    LeftCmd = -0.85 - (0.15 * DeltaDistance);<a name="line.277"></a>
+<span class="sourceLineNo">278</span>                    RightCmd = -0.85 + (0.15 * DeltaDistance);<a name="line.278"></a>
+<span class="sourceLineNo">279</span>                } else {<a name="line.279"></a>
+<span class="sourceLineNo">280</span>                    TimerCount = 0;<a name="line.280"></a>
+<span class="sourceLineNo">281</span><a name="line.281"></a>
+<span class="sourceLineNo">282</span>                    IdistanceL = PrevErrorL = 0;<a name="line.282"></a>
+<span class="sourceLineNo">283</span>                    IdistanceR = PrevErrorR = 0;<a name="line.283"></a>
+<span class="sourceLineNo">284</span><a name="line.284"></a>
+<span class="sourceLineNo">285</span>                    if (AutonSwitch) {<a name="line.285"></a>
+<span class="sourceLineNo">286</span>                        LeftEncoder.reset();<a name="line.286"></a>
+<span class="sourceLineNo">287</span>                        RightEncoder.reset();<a name="line.287"></a>
+<span class="sourceLineNo">288</span><a name="line.288"></a>
+<span class="sourceLineNo">289</span>                        AutonMode = TURN_RIGHT_90;<a name="line.289"></a>
+<span class="sourceLineNo">290</span>                    } else {<a name="line.290"></a>
+<span class="sourceLineNo">291</span>                        AutonMode = 0;<a name="line.291"></a>
+<span class="sourceLineNo">292</span>                    }<a name="line.292"></a>
+<span class="sourceLineNo">293</span>                }<a name="line.293"></a>
+<span class="sourceLineNo">294</span>                break;<a name="line.294"></a>
+<span class="sourceLineNo">295</span>            }<a name="line.295"></a>
+<span class="sourceLineNo">296</span>            <a name="line.296"></a>
+<span class="sourceLineNo">297</span>            //Turn right 90 degrees<a name="line.297"></a>
+<span class="sourceLineNo">298</span>            case TURN_RIGHT_90: {<a name="line.298"></a>
+<span class="sourceLineNo">299</span>                //Not Eldon<a name="line.299"></a>
+<span class="sourceLineNo">300</span>                break;<a name="line.300"></a>
+<span class="sourceLineNo">301</span>            }<a name="line.301"></a>
+<span class="sourceLineNo">302</span>            <a name="line.302"></a>
+<span class="sourceLineNo">303</span>            //Grab a ball using whatever mechanism collects balls<a name="line.303"></a>
+<span class="sourceLineNo">304</span>            case COLLECT_BALL: {<a name="line.304"></a>
+<span class="sourceLineNo">305</span>                <a name="line.305"></a>
 <span class="sourceLineNo">306</span>                break;<a name="line.306"></a>
-<span class="sourceLineNo">307</span>            } <a name="line.307"></a>
-<span class="sourceLineNo">308</span>            //Turn left after collecting the ball<a name="line.308"></a>
-<span class="sourceLineNo">309</span>            case TURN_LEFT_90: {<a name="line.309"></a>
-<span class="sourceLineNo">310</span>                <a name="line.310"></a>
-<span class="sourceLineNo">311</span>                boolean IsTargetDistanceL = false;<a name="line.311"></a>
-<span class="sourceLineNo">312</span>                boolean IsTargetDistanceR = false;<a name="line.312"></a>
-<span class="sourceLineNo">313</span>                <a name="line.313"></a>
-<span class="sourceLineNo">314</span>                if(LeftEncoder.getDistance() &gt; TargetDistanceL){<a name="line.314"></a>
-<span class="sourceLineNo">315</span>                    LeftCmd = -(0.25 * PdistanceL) - 0.2;<a name="line.315"></a>
-<span class="sourceLineNo">316</span>                } else {<a name="line.316"></a>
-<span class="sourceLineNo">317</span>                    IsTargetDistanceL = true;<a name="line.317"></a>
-<span class="sourceLineNo">318</span>                    LeftCmd = 0;<a name="line.318"></a>
-<span class="sourceLineNo">319</span>                }<a name="line.319"></a>
-<span class="sourceLineNo">320</span>                <a name="line.320"></a>
-<span class="sourceLineNo">321</span>                if(RightEncoder.getDistance() &lt; 16.10066235){<a name="line.321"></a>
-<span class="sourceLineNo">322</span>                    RightCmd = (0.25 * PdistanceR) + 0.2;<a name="line.322"></a>
-<span class="sourceLineNo">323</span>                } else {<a name="line.323"></a>
-<span class="sourceLineNo">324</span>                    IsTargetDistanceR = true;<a name="line.324"></a>
-<span class="sourceLineNo">325</span>                    RightCmd = 0;<a name="line.325"></a>
-<span class="sourceLineNo">326</span>                }<a name="line.326"></a>
-<span class="sourceLineNo">327</span>                <a name="line.327"></a>
-<span class="sourceLineNo">328</span>                if (IsTargetDistanceL &amp;&amp; IsTargetDistanceR){<a name="line.328"></a>
-<span class="sourceLineNo">329</span>                    TimerCount = 0;<a name="line.329"></a>
-<span class="sourceLineNo">330</span>                    <a name="line.330"></a>
-<span class="sourceLineNo">331</span>                    LeftCmd = 0;<a name="line.331"></a>
-<span class="sourceLineNo">332</span>                    RightCmd = 0;<a name="line.332"></a>
-<span class="sourceLineNo">333</span>                    <a name="line.333"></a>
-<span class="sourceLineNo">334</span>                    LeftEncoder.reset();<a name="line.334"></a>
-<span class="sourceLineNo">335</span>                    RightEncoder.reset();<a name="line.335"></a>
-<span class="sourceLineNo">336</span>                    <a name="line.336"></a>
-<span class="sourceLineNo">337</span>                    TargetRateL = 47.46428571428571;<a name="line.337"></a>
-<span class="sourceLineNo">338</span>                    TargetRateR = 47.46428571428571;<a name="line.338"></a>
-<span class="sourceLineNo">339</span>                    <a name="line.339"></a>
-<span class="sourceLineNo">340</span>                    AutonMode = FORWARD_2;<a name="line.340"></a>
-<span class="sourceLineNo">341</span>                } break;<a name="line.341"></a>
-<span class="sourceLineNo">342</span>            }<a name="line.342"></a>
-<span class="sourceLineNo">343</span>            case FORWARD_2: {<a name="line.343"></a>
-<span class="sourceLineNo">344</span>                if (LeftEncoder.getDistance() &lt; 120 || RightEncoder.getDistance() &lt; 120) {<a name="line.344"></a>
-<span class="sourceLineNo">345</span>                <a name="line.345"></a>
-<span class="sourceLineNo">346</span>                LeftCmd = (0.15 * PrateL + 0.3);<a name="line.346"></a>
-<span class="sourceLineNo">347</span>                RightCmd = (0.15 * PrateR + 0.3);<a name="line.347"></a>
-<span class="sourceLineNo">348</span>            <a name="line.348"></a>
-<span class="sourceLineNo">349</span>            } else {<a name="line.349"></a>
-<span class="sourceLineNo">350</span>                LeftCmd = 0;<a name="line.350"></a>
-<span class="sourceLineNo">351</span>                RightCmd = 0;<a name="line.351"></a>
-<span class="sourceLineNo">352</span>                <a name="line.352"></a>
-<span class="sourceLineNo">353</span>                LeftEncoder.reset();<a name="line.353"></a>
-<span class="sourceLineNo">354</span>                RightEncoder.reset();<a name="line.354"></a>
-<span class="sourceLineNo">355</span>                <a name="line.355"></a>
-<span class="sourceLineNo">356</span>                TimerCount = 0;<a name="line.356"></a>
-<span class="sourceLineNo">357</span>                AutonMode = SHOOT_2;<a name="line.357"></a>
-<span class="sourceLineNo">358</span>                } break;<a name="line.358"></a>
-<span class="sourceLineNo">359</span>            } <a name="line.359"></a>
-<span class="sourceLineNo">360</span>            //Shoot with the second ball (no shooter, so wait for 50 loops)<a name="line.360"></a>
-<span class="sourceLineNo">361</span>            case SHOOT_2: {<a name="line.361"></a>
-<span class="sourceLineNo">362</span>                if (TimerCount &lt; 100){<a name="line.362"></a>
-<span class="sourceLineNo">363</span>                    CollectorMotor.set(1);<a name="line.363"></a>
-<span class="sourceLineNo">364</span>                    TimerCount++;<a name="line.364"></a>
-<span class="sourceLineNo">365</span>                } else {<a name="line.365"></a>
-<span class="sourceLineNo">366</span>                    TimerCount = 0;<a name="line.366"></a>
-<span class="sourceLineNo">367</span>                    LeftEncoder.reset();<a name="line.367"></a>
-<span class="sourceLineNo">368</span>                    RightEncoder.reset();<a name="line.368"></a>
-<span class="sourceLineNo">369</span>                    LeftCmd = 0;<a name="line.369"></a>
-<span class="sourceLineNo">370</span>                    RightCmd = 0;<a name="line.370"></a>
-<span class="sourceLineNo">371</span>                }<a name="line.371"></a>
-<span class="sourceLineNo">372</span>                break;<a name="line.372"></a>
-<span class="sourceLineNo">373</span>            }<a name="line.373"></a>
-<span class="sourceLineNo">374</span>            //don't do anything--should never be called<a name="line.374"></a>
-<span class="sourceLineNo">375</span>            default: {<a name="line.375"></a>
-<span class="sourceLineNo">376</span>                /*CollectorMotor.set(0);<a name="line.376"></a>
-<span class="sourceLineNo">377</span>                LeftCmd = 0;<a name="line.377"></a>
-<span class="sourceLineNo">378</span>                RightCmd = 0;*/<a name="line.378"></a>
-<span class="sourceLineNo">379</span>                break;<a name="line.379"></a>
-<span class="sourceLineNo">380</span>            }<a name="line.380"></a>
-<span class="sourceLineNo">381</span>        }<a name="line.381"></a>
-<span class="sourceLineNo">382</span>        <a name="line.382"></a>
-<span class="sourceLineNo">383</span>        drive(LeftCmd, RightCmd);<a name="line.383"></a>
-<span class="sourceLineNo">384</span>        PrevErrorL = IdistanceL;<a name="line.384"></a>
-<span class="sourceLineNo">385</span>        PrevErrorR = IdistanceR;<a name="line.385"></a>
-<span class="sourceLineNo">386</span>        <a name="line.386"></a>
-<span class="sourceLineNo">387</span>        SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder, stick, CoOpstick, RCMode);<a name="line.387"></a>
-<span class="sourceLineNo">388</span>    }<a name="line.388"></a>
-<span class="sourceLineNo">389</span><a name="line.389"></a>
-<span class="sourceLineNo">390</span>    /**<a name="line.390"></a>
-<span class="sourceLineNo">391</span>     * This function is called before operator control and should be used for<a name="line.391"></a>
-<span class="sourceLineNo">392</span>     * any initialization code.<a name="line.392"></a>
-<span class="sourceLineNo">393</span>     */<a name="line.393"></a>
-<span class="sourceLineNo">394</span>    public void teleopInit() {<a name="line.394"></a>
-<span class="sourceLineNo">395</span>        RCMode = true;<a name="line.395"></a>
-<span class="sourceLineNo">396</span>        rotateDown();<a name="line.396"></a>
-<span class="sourceLineNo">397</span>    }<a name="line.397"></a>
+<span class="sourceLineNo">307</span>            }<a name="line.307"></a>
+<span class="sourceLineNo">308</span>            <a name="line.308"></a>
+<span class="sourceLineNo">309</span>            //Turn left after collecting the ball<a name="line.309"></a>
+<span class="sourceLineNo">310</span>            case TURN_LEFT_90: {<a name="line.310"></a>
+<span class="sourceLineNo">311</span><a name="line.311"></a>
+<span class="sourceLineNo">312</span>                break;<a name="line.312"></a>
+<span class="sourceLineNo">313</span>            }<a name="line.313"></a>
+<span class="sourceLineNo">314</span>            <a name="line.314"></a>
+<span class="sourceLineNo">315</span>            //Shoot with the second ball<a name="line.315"></a>
+<span class="sourceLineNo">316</span>            case SHOOT_2: {<a name="line.316"></a>
+<span class="sourceLineNo">317</span>                <a name="line.317"></a>
+<span class="sourceLineNo">318</span>                break;<a name="line.318"></a>
+<span class="sourceLineNo">319</span>            }<a name="line.319"></a>
+<span class="sourceLineNo">320</span>            <a name="line.320"></a>
+<span class="sourceLineNo">321</span>            //don't do anything<a name="line.321"></a>
+<span class="sourceLineNo">322</span>            default: {<a name="line.322"></a>
+<span class="sourceLineNo">323</span>                collectorMStop();<a name="line.323"></a>
+<span class="sourceLineNo">324</span>                LeftCmd = 0;<a name="line.324"></a>
+<span class="sourceLineNo">325</span>                RightCmd = 0;<a name="line.325"></a>
+<span class="sourceLineNo">326</span>                break;<a name="line.326"></a>
+<span class="sourceLineNo">327</span>            }<a name="line.327"></a>
+<span class="sourceLineNo">328</span>        }<a name="line.328"></a>
+<span class="sourceLineNo">329</span><a name="line.329"></a>
+<span class="sourceLineNo">330</span>        drive(LeftCmd, RightCmd);<a name="line.330"></a>
+<span class="sourceLineNo">331</span>        PrevErrorL = IdistanceL;<a name="line.331"></a>
+<span class="sourceLineNo">332</span>        PrevErrorR = IdistanceR;<a name="line.332"></a>
+<span class="sourceLineNo">333</span><a name="line.333"></a>
+<span class="sourceLineNo">334</span>        SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder, stick, CoOpstick, RCMode);<a name="line.334"></a>
+<span class="sourceLineNo">335</span>    }<a name="line.335"></a>
+<span class="sourceLineNo">336</span><a name="line.336"></a>
+<span class="sourceLineNo">337</span>    /**<a name="line.337"></a>
+<span class="sourceLineNo">338</span>     * This function is called before operator control and should be used for<a name="line.338"></a>
+<span class="sourceLineNo">339</span>     * any initialization code.<a name="line.339"></a>
+<span class="sourceLineNo">340</span>     */<a name="line.340"></a>
+<span class="sourceLineNo">341</span>    public void teleopInit() {<a name="line.341"></a>
+<span class="sourceLineNo">342</span>        RCMode = true;<a name="line.342"></a>
+<span class="sourceLineNo">343</span><a name="line.343"></a>
+<span class="sourceLineNo">344</span>        rotateUp();<a name="line.344"></a>
+<span class="sourceLineNo">345</span><a name="line.345"></a>
+<span class="sourceLineNo">346</span>        LeftEncoder.reset();<a name="line.346"></a>
+<span class="sourceLineNo">347</span>        RightEncoder.reset();<a name="line.347"></a>
+<span class="sourceLineNo">348</span>    }<a name="line.348"></a>
+<span class="sourceLineNo">349</span><a name="line.349"></a>
+<span class="sourceLineNo">350</span>    /**<a name="line.350"></a>
+<span class="sourceLineNo">351</span>     * This function is called periodically during operator control<a name="line.351"></a>
+<span class="sourceLineNo">352</span>     */<a name="line.352"></a>
+<span class="sourceLineNo">353</span>    public void teleopPeriodic() {<a name="line.353"></a>
+<span class="sourceLineNo">354</span>        Shooter.periodic();<a name="line.354"></a>
+<span class="sourceLineNo">355</span>        //Toggle between drive modes RC and Tank<a name="line.355"></a>
+<span class="sourceLineNo">356</span>        if (!PrevButton7 &amp;&amp; stick.getRawButton(7)) {<a name="line.356"></a>
+<span class="sourceLineNo">357</span>            RCMode = !RCMode;<a name="line.357"></a>
+<span class="sourceLineNo">358</span>        }<a name="line.358"></a>
+<span class="sourceLineNo">359</span><a name="line.359"></a>
+<span class="sourceLineNo">360</span>        if (RCMode) {<a name="line.360"></a>
+<span class="sourceLineNo">361</span>            Speed = deadband(2, .03);<a name="line.361"></a>
+<span class="sourceLineNo">362</span>            Turn = deadband(4, .03);<a name="line.362"></a>
+<span class="sourceLineNo">363</span><a name="line.363"></a>
+<span class="sourceLineNo">364</span>            RightCmd = Speed + Turn;<a name="line.364"></a>
+<span class="sourceLineNo">365</span>            LeftCmd = Speed - Turn;<a name="line.365"></a>
+<span class="sourceLineNo">366</span>        } else {<a name="line.366"></a>
+<span class="sourceLineNo">367</span>            //Tank Drive uses left joystick for left motor speed control<a name="line.367"></a>
+<span class="sourceLineNo">368</span>            //and right joystick for right motor speed control<a name="line.368"></a>
+<span class="sourceLineNo">369</span>            LeftCmd = deadband(2, .03);<a name="line.369"></a>
+<span class="sourceLineNo">370</span>            RightCmd = deadband(5, .03);<a name="line.370"></a>
+<span class="sourceLineNo">371</span>        }<a name="line.371"></a>
+<span class="sourceLineNo">372</span>        //Shift<a name="line.372"></a>
+<span class="sourceLineNo">373</span>        if (stick.getRawButton(5)) {<a name="line.373"></a>
+<span class="sourceLineNo">374</span>            Shifter.set(false);<a name="line.374"></a>
+<span class="sourceLineNo">375</span>        } else if (stick.getRawButton(6)) {<a name="line.375"></a>
+<span class="sourceLineNo">376</span>            Shifter.set(true);<a name="line.376"></a>
+<span class="sourceLineNo">377</span>        }<a name="line.377"></a>
+<span class="sourceLineNo">378</span>        //Set the solenoid value for the Jaws, which is controlled by two<a name="line.378"></a>
+<span class="sourceLineNo">379</span>        //seperate solenoids<a name="line.379"></a>
+<span class="sourceLineNo">380</span>        if (CoOpstick.getRawButton(JAWS_CLOSE)) {<a name="line.380"></a>
+<span class="sourceLineNo">381</span>            jawsClose();<a name="line.381"></a>
+<span class="sourceLineNo">382</span>        } else if (CoOpstick.getRawButton(JAWS_OPEN)) {<a name="line.382"></a>
+<span class="sourceLineNo">383</span>            jawsOpen();<a name="line.383"></a>
+<span class="sourceLineNo">384</span>        } else if (CoOpstick.getRawButton(JAWS_RELAX)){<a name="line.384"></a>
+<span class="sourceLineNo">385</span>            jawsRelax();<a name="line.385"></a>
+<span class="sourceLineNo">386</span>        }<a name="line.386"></a>
+<span class="sourceLineNo">387</span>        CollectorMotor.set(-CoOpdeadband(2, 0.03));<a name="line.387"></a>
+<span class="sourceLineNo">388</span><a name="line.388"></a>
+<span class="sourceLineNo">389</span>        if (CoOpstick.getRawAxis(ROTATOR_AXIS) &gt;= 0.5) {<a name="line.389"></a>
+<span class="sourceLineNo">390</span>            rotateDown();<a name="line.390"></a>
+<span class="sourceLineNo">391</span>        } else if(CoOpstick.getRawAxis(ROTATOR_AXIS) &lt;= -0.5){<a name="line.391"></a>
+<span class="sourceLineNo">392</span>            rotateUp();<a name="line.392"></a>
+<span class="sourceLineNo">393</span>        }<a name="line.393"></a>
+<span class="sourceLineNo">394</span><a name="line.394"></a>
+<span class="sourceLineNo">395</span>        if (CoOpstick.getRawButton(SHOOTER_BUTTON)) {<a name="line.395"></a>
+<span class="sourceLineNo">396</span>            Shooter.trigger();<a name="line.396"></a>
+<span class="sourceLineNo">397</span>        }<a name="line.397"></a>
 <span class="sourceLineNo">398</span><a name="line.398"></a>
-<span class="sourceLineNo">399</span>    /**<a name="line.399"></a>
-<span class="sourceLineNo">400</span>     * This function is called periodically during operator control<a name="line.400"></a>
-<span class="sourceLineNo">401</span>     */<a name="line.401"></a>
-<span class="sourceLineNo">402</span>    public void teleopPeriodic() {<a name="line.402"></a>
-<span class="sourceLineNo">403</span>        //Toggle between drive modes RC and Tank<a name="line.403"></a>
-<span class="sourceLineNo">404</span>        if (!Pbutton11 &amp;&amp; stick.getRawButton(7)) {<a name="line.404"></a>
-<span class="sourceLineNo">405</span>            RCMode = !RCMode;<a name="line.405"></a>
-<span class="sourceLineNo">406</span>        }<a name="line.406"></a>
-<span class="sourceLineNo">407</span>        if (!RCMode) {<a name="line.407"></a>
-<span class="sourceLineNo">408</span>            LeftCmd = deadband(2, .03);<a name="line.408"></a>
-<span class="sourceLineNo">409</span>            RightCmd = deadband(5, .03);<a name="line.409"></a>
-<span class="sourceLineNo">410</span><a name="line.410"></a>
-<span class="sourceLineNo">411</span>            drive(LeftCmd, RightCmd);<a name="line.411"></a>
-<span class="sourceLineNo">412</span>        } else {<a name="line.412"></a>
-<span class="sourceLineNo">413</span>            Speed = deadband(2, .03);<a name="line.413"></a>
-<span class="sourceLineNo">414</span>            Turn = deadband(4, .03);<a name="line.414"></a>
-<span class="sourceLineNo">415</span><a name="line.415"></a>
-<span class="sourceLineNo">416</span>            RightCmd = Speed + Turn;<a name="line.416"></a>
-<span class="sourceLineNo">417</span>            LeftCmd = Speed - Turn;<a name="line.417"></a>
-<span class="sourceLineNo">418</span><a name="line.418"></a>
-<span class="sourceLineNo">419</span>            drive(LeftCmd, RightCmd);<a name="line.419"></a>
-<span class="sourceLineNo">420</span>        }<a name="line.420"></a>
-<span class="sourceLineNo">421</span>        //Set the solenoid value for the Jaws, which is controlled by two<a name="line.421"></a>
-<span class="sourceLineNo">422</span>        //seperate solenoids<a name="line.422"></a>
-<span class="sourceLineNo">423</span>        if (CoOpstick.getRawButton(JAWS_ClOSE)) {<a name="line.423"></a>
-<span class="sourceLineNo">424</span>            jawsClose();<a name="line.424"></a>
-<span class="sourceLineNo">425</span>        } else if (CoOpstick.getRawButton(JAWS_OPEN)) {<a name="line.425"></a>
-<span class="sourceLineNo">426</span>            jawsOpen();<a name="line.426"></a>
-<span class="sourceLineNo">427</span>        } else if (CoOpstick.getRawButton(JAWS_ClOSE) == false &amp;&amp; CoOpstick.getRawButton(JAWS_OPEN) == false) {<a name="line.427"></a>
-<span class="sourceLineNo">428</span>            jawsRelax();<a name="line.428"></a>
-<span class="sourceLineNo">429</span>        } else {<a name="line.429"></a>
-<span class="sourceLineNo">430</span>            jawsClose();<a name="line.430"></a>
-<span class="sourceLineNo">431</span>        }<a name="line.431"></a>
-<span class="sourceLineNo">432</span>        if (CoOpstick.getRawButton(COLLECTOR_MOTOR_IN)) {<a name="line.432"></a>
-<span class="sourceLineNo">433</span>            collectorMCollect();<a name="line.433"></a>
-<span class="sourceLineNo">434</span>        } else if (CoOpstick.getRawButton(COLLECTOR_MOTOR_OUT)) {<a name="line.434"></a>
-<span class="sourceLineNo">435</span>            collectorMSpit();<a name="line.435"></a>
-<span class="sourceLineNo">436</span>        } else {<a name="line.436"></a>
-<span class="sourceLineNo">437</span>            collectorMStop();<a name="line.437"></a>
-<span class="sourceLineNo">438</span>        }<a name="line.438"></a>
-<span class="sourceLineNo">439</span><a name="line.439"></a>
-<span class="sourceLineNo">440</span>        if (CoOpstick.getRawButton(ROTATOR_SWITCH)) {<a name="line.440"></a>
-<span class="sourceLineNo">441</span>            rotateUp();<a name="line.441"></a>
-<span class="sourceLineNo">442</span>        } else {<a name="line.442"></a>
-<span class="sourceLineNo">443</span>            rotateDown();<a name="line.443"></a>
-<span class="sourceLineNo">444</span>        }<a name="line.444"></a>
-<span class="sourceLineNo">445</span><a name="line.445"></a>
-<span class="sourceLineNo">446</span>        SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder, stick, CoOpstick, RCMode);<a name="line.446"></a>
-<span class="sourceLineNo">447</span>        SmartDashboardData.putNumber(Jaws.getSmartDashboardType(), Jaws.get().value);<a name="line.447"></a>
-<span class="sourceLineNo">448</span>        SmartDashboardData.putNumber("Shooter Motor", ShooterMotor.get());<a name="line.448"></a>
-<span class="sourceLineNo">449</span>        Pbutton11 = stick.getRawButton(7);<a name="line.449"></a>
-<span class="sourceLineNo">450</span>    }<a name="line.450"></a>
-<span class="sourceLineNo">451</span><a name="line.451"></a>
-<span class="sourceLineNo">452</span>    /**<a name="line.452"></a>
-<span class="sourceLineNo">453</span>     * This function is called periodically during test mode<a name="line.453"></a>
+<span class="sourceLineNo">399</span>        drive(LeftCmd, RightCmd);<a name="line.399"></a>
+<span class="sourceLineNo">400</span><a name="line.400"></a>
+<span class="sourceLineNo">401</span>        PrevButton7 = stick.getRawButton(7);<a name="line.401"></a>
+<span class="sourceLineNo">402</span><a name="line.402"></a>
+<span class="sourceLineNo">403</span>        SDD.putSDData(LeftMotor_1, LeftMotor_2, RightMotor_1, RightMotor_2, LeftEncoder, RightEncoder, stick, CoOpstick, RCMode);<a name="line.403"></a>
+<span class="sourceLineNo">404</span>        SmartDashboardData.putNumber(Jaws.getSmartDashboardType(), Jaws.get().value);<a name="line.404"></a>
+<span class="sourceLineNo">405</span>        SmartDashboardData.putNumber("Shooter Motor", ShooterMotor.get());<a name="line.405"></a>
+<span class="sourceLineNo">406</span>    }<a name="line.406"></a>
+<span class="sourceLineNo">407</span><a name="line.407"></a>
+<span class="sourceLineNo">408</span>    /**<a name="line.408"></a>
+<span class="sourceLineNo">409</span>     * This function is called periodically during test mode<a name="line.409"></a>
+<span class="sourceLineNo">410</span>     */<a name="line.410"></a>
+<span class="sourceLineNo">411</span>    public void testPeriodic() {<a name="line.411"></a>
+<span class="sourceLineNo">412</span><a name="line.412"></a>
+<span class="sourceLineNo">413</span>    }<a name="line.413"></a>
+<span class="sourceLineNo">414</span>    <a name="line.414"></a>
+<span class="sourceLineNo">415</span>    double leftoutput;<a name="line.415"></a>
+<span class="sourceLineNo">416</span>    double rightoutput;<a name="line.416"></a>
+<span class="sourceLineNo">417</span>    double accelerationlimit;<a name="line.417"></a>
+<span class="sourceLineNo">418</span>    <a name="line.418"></a>
+<span class="sourceLineNo">419</span>    public void driveInit() {<a name="line.419"></a>
+<span class="sourceLineNo">420</span>        leftoutput = 0;<a name="line.420"></a>
+<span class="sourceLineNo">421</span>        rightoutput = 0;<a name="line.421"></a>
+<span class="sourceLineNo">422</span>        accelerationlimit = 0.02;<a name="line.422"></a>
+<span class="sourceLineNo">423</span>    }<a name="line.423"></a>
+<span class="sourceLineNo">424</span>    /**<a name="line.424"></a>
+<span class="sourceLineNo">425</span>     * Set the output for both motors<a name="line.425"></a>
+<span class="sourceLineNo">426</span>     *<a name="line.426"></a>
+<span class="sourceLineNo">427</span>     * @param leftspeed double ranging from -1.0 to 1.0, adding anything higher<a name="line.427"></a>
+<span class="sourceLineNo">428</span>     * or lower will not cause errors and will automatically be adjusted. Left<a name="line.428"></a>
+<span class="sourceLineNo">429</span>     * Motor is inverted and the Talon can only be inverted directly in the<a name="line.429"></a>
+<span class="sourceLineNo">430</span>     * output.<a name="line.430"></a>
+<span class="sourceLineNo">431</span>     *<a name="line.431"></a>
+<span class="sourceLineNo">432</span>     * @param rightspeed double ranging from -1.0 to 1.0, adding anything higher<a name="line.432"></a>
+<span class="sourceLineNo">433</span>     * or lower will not cause errors and will automatically be adjusted.<a name="line.433"></a>
+<span class="sourceLineNo">434</span>     */<a name="line.434"></a>
+<span class="sourceLineNo">435</span>    public void drive(double leftspeed, double rightspeed) {<a name="line.435"></a>
+<span class="sourceLineNo">436</span>        LeftMotor_1.set(-leftspeed);<a name="line.436"></a>
+<span class="sourceLineNo">437</span>        LeftMotor_2.set(-leftspeed);<a name="line.437"></a>
+<span class="sourceLineNo">438</span>        RightMotor_1.set(rightspeed);<a name="line.438"></a>
+<span class="sourceLineNo">439</span>        RightMotor_2.set(rightspeed);<a name="line.439"></a>
+<span class="sourceLineNo">440</span>    }<a name="line.440"></a>
+<span class="sourceLineNo">441</span><a name="line.441"></a>
+<span class="sourceLineNo">442</span>    /**<a name="line.442"></a>
+<span class="sourceLineNo">443</span>     * Sets a dead band on a joystick axis to prevent constant power drain.<a name="line.443"></a>
+<span class="sourceLineNo">444</span>     *<a name="line.444"></a>
+<span class="sourceLineNo">445</span>     * @param axis The joystick axis to be used. The joystick is named "stick"<a name="line.445"></a>
+<span class="sourceLineNo">446</span>     * and is initialized in robotInit.<a name="line.446"></a>
+<span class="sourceLineNo">447</span>     *<a name="line.447"></a>
+<span class="sourceLineNo">448</span>     * @param deadband The dead band value. If the joystick is within the dead<a name="line.448"></a>
+<span class="sourceLineNo">449</span>     * band, the function returns 0.<a name="line.449"></a>
+<span class="sourceLineNo">450</span>     *<a name="line.450"></a>
+<span class="sourceLineNo">451</span>     * @return If the joystick is within the dead band, returns 0. Otherwise,<a name="line.451"></a>
+<span class="sourceLineNo">452</span>     * the negative of the axis will be returned because the joystick returns <a name="line.452"></a>
+<span class="sourceLineNo">453</span>     * negative in the positive direction.<a name="line.453"></a>
 <span class="sourceLineNo">454</span>     */<a name="line.454"></a>
-<span class="sourceLineNo">455</span>    public void testPeriodic() {<a name="line.455"></a>
-<span class="sourceLineNo">456</span><a name="line.456"></a>
-<span class="sourceLineNo">457</span>    }<a name="line.457"></a>
-<span class="sourceLineNo">458</span><a name="line.458"></a>
-<span class="sourceLineNo">459</span>    /**<a name="line.459"></a>
-<span class="sourceLineNo">460</span>     * Set the output for both motors<a name="line.460"></a>
-<span class="sourceLineNo">461</span>     *<a name="line.461"></a>
-<span class="sourceLineNo">462</span>     * @param leftspeed double ranging from -1.0 to 1.0, adding anything higher<a name="line.462"></a>
-<span class="sourceLineNo">463</span>     * or lower will not cause errors and will automatically be adjusted<a name="line.463"></a>
-<span class="sourceLineNo">464</span>     *<a name="line.464"></a>
-<span class="sourceLineNo">465</span>     * @param rightspeed double ranging from -1.0 to 1.0, adding anything higher<a name="line.465"></a>
-<span class="sourceLineNo">466</span>     * or lower will not cause errors and will automatically be adjusted. Right<a name="line.466"></a>
-<span class="sourceLineNo">467</span>     * Motor is inverted and the Victor can only be inverted directly in the<a name="line.467"></a>
-<span class="sourceLineNo">468</span>     * output.<a name="line.468"></a>
-<span class="sourceLineNo">469</span>     */<a name="line.469"></a>
-<span class="sourceLineNo">470</span>    public void drive(double leftspeed, double rightspeed) {<a name="line.470"></a>
-<span class="sourceLineNo">471</span>        LeftMotor_1.set(leftspeed);<a name="line.471"></a>
-<span class="sourceLineNo">472</span>        LeftMotor_2.set(leftspeed);<a name="line.472"></a>
-<span class="sourceLineNo">473</span>        RightMotor_1.set(-rightspeed);<a name="line.473"></a>
-<span class="sourceLineNo">474</span>        RightMotor_2.set(-rightspeed);<a name="line.474"></a>
-<span class="sourceLineNo">475</span>    }<a name="line.475"></a>
-<span class="sourceLineNo">476</span>    <a name="line.476"></a>
-<span class="sourceLineNo">477</span>    /**<a name="line.477"></a>
-<span class="sourceLineNo">478</span>     * Sets a dead band on a joystick axis to prevent constant power drain.<a name="line.478"></a>
-<span class="sourceLineNo">479</span>     * <a name="line.479"></a>
-<span class="sourceLineNo">480</span>     * @param axis The joystick axis to be used. The joystick is named "stick" <a name="line.480"></a>
-<span class="sourceLineNo">481</span>     * and is initialized in robotInit.<a name="line.481"></a>
-<span class="sourceLineNo">482</span>     * <a name="line.482"></a>
-<span class="sourceLineNo">483</span>     * @param deadband The dead band value. If the joystick is within the dead<a name="line.483"></a>
-<span class="sourceLineNo">484</span>     * band, the function returns 0.<a name="line.484"></a>
-<span class="sourceLineNo">485</span>     * <a name="line.485"></a>
-<span class="sourceLineNo">486</span>     * @return If the joystick is within the dead band, returns 0. Otherwise, <a name="line.486"></a>
-<span class="sourceLineNo">487</span>     * the value of the axis will be returned.<a name="line.487"></a>
-<span class="sourceLineNo">488</span>     */<a name="line.488"></a>
-<span class="sourceLineNo">489</span>    public double deadband(int axis, double deadband) {<a name="line.489"></a>
-<span class="sourceLineNo">490</span>        if (stick.getRawAxis(axis) &gt; -deadband &amp;&amp; stick.getRawAxis(axis) &lt; deadband) {<a name="line.490"></a>
-<span class="sourceLineNo">491</span>            return 0;<a name="line.491"></a>
-<span class="sourceLineNo">492</span>        } else {<a name="line.492"></a>
-<span class="sourceLineNo">493</span>            return stick.getRawAxis(axis);<a name="line.493"></a>
-<span class="sourceLineNo">494</span>        }<a name="line.494"></a>
-<span class="sourceLineNo">495</span>    }<a name="line.495"></a>
-<span class="sourceLineNo">496</span>    <a name="line.496"></a>
-<span class="sourceLineNo">497</span>    /**<a name="line.497"></a>
-<span class="sourceLineNo">498</span>     * Sets the value for the rotator to forward.<a name="line.498"></a>
-<span class="sourceLineNo">499</span>     */<a name="line.499"></a>
-<span class="sourceLineNo">500</span>    public void rotateUp() {<a name="line.500"></a>
-<span class="sourceLineNo">501</span>        Rotator.set(DoubleSolenoid.Value.kForward);<a name="line.501"></a>
-<span class="sourceLineNo">502</span>    }<a name="line.502"></a>
-<span class="sourceLineNo">503</span><a name="line.503"></a>
-<span class="sourceLineNo">504</span>    /**<a name="line.504"></a>
-<span class="sourceLineNo">505</span>     * Sets the value for the rotator to reverse.<a name="line.505"></a>
-<span class="sourceLineNo">506</span>     */<a name="line.506"></a>
-<span class="sourceLineNo">507</span>    public void rotateDown() {<a name="line.507"></a>
-<span class="sourceLineNo">508</span>        Rotator.set(DoubleSolenoid.Value.kReverse);<a name="line.508"></a>
-<span class="sourceLineNo">509</span>    }<a name="line.509"></a>
-<span class="sourceLineNo">510</span><a name="line.510"></a>
-<span class="sourceLineNo">511</span>    /**<a name="line.511"></a>
-<span class="sourceLineNo">512</span>     * Sets the value for the jaws to reverse.<a name="line.512"></a>
-<span class="sourceLineNo">513</span>     */<a name="line.513"></a>
-<span class="sourceLineNo">514</span>    public void jawsClose() {<a name="line.514"></a>
-<span class="sourceLineNo">515</span>        Jaws.set(DoubleSolenoid.Value.kReverse);<a name="line.515"></a>
-<span class="sourceLineNo">516</span>    }<a name="line.516"></a>
-<span class="sourceLineNo">517</span><a name="line.517"></a>
-<span class="sourceLineNo">518</span>    /**<a name="line.518"></a>
-<span class="sourceLineNo">519</span>     * Sets the value for the jaws to forward.<a name="line.519"></a>
-<span class="sourceLineNo">520</span>     */<a name="line.520"></a>
-<span class="sourceLineNo">521</span>    public void jawsOpen() {<a name="line.521"></a>
-<span class="sourceLineNo">522</span>        Jaws.set(DoubleSolenoid.Value.kForward);<a name="line.522"></a>
-<span class="sourceLineNo">523</span>    }<a name="line.523"></a>
-<span class="sourceLineNo">524</span><a name="line.524"></a>
-<span class="sourceLineNo">525</span>    /**<a name="line.525"></a>
-<span class="sourceLineNo">526</span>     * Sets the value for the jaws to off.<a name="line.526"></a>
-<span class="sourceLineNo">527</span>     */<a name="line.527"></a>
-<span class="sourceLineNo">528</span>    public void jawsRelax() {<a name="line.528"></a>
-<span class="sourceLineNo">529</span>        Jaws.set(DoubleSolenoid.Value.kOff);<a name="line.529"></a>
-<span class="sourceLineNo">530</span>    }<a name="line.530"></a>
-<span class="sourceLineNo">531</span><a name="line.531"></a>
-<span class="sourceLineNo">532</span>    /**<a name="line.532"></a>
-<span class="sourceLineNo">533</span>     * Sets the collector motor to -1.<a name="line.533"></a>
-<span class="sourceLineNo">534</span>     */<a name="line.534"></a>
-<span class="sourceLineNo">535</span>    public void collectorMCollect() {<a name="line.535"></a>
-<span class="sourceLineNo">536</span>        CollectorMotor.set(-1);<a name="line.536"></a>
-<span class="sourceLineNo">537</span>    }<a name="line.537"></a>
-<span class="sourceLineNo">538</span><a name="line.538"></a>
-<span class="sourceLineNo">539</span>    /**<a name="line.539"></a>
-<span class="sourceLineNo">540</span>     * Sets the collector motor to 1.<a name="line.540"></a>
-<span class="sourceLineNo">541</span>     */<a name="line.541"></a>
-<span class="sourceLineNo">542</span>    public void collectorMSpit() {<a name="line.542"></a>
-<span class="sourceLineNo">543</span>        CollectorMotor.set(1);<a name="line.543"></a>
-<span class="sourceLineNo">544</span>    }<a name="line.544"></a>
-<span class="sourceLineNo">545</span><a name="line.545"></a>
-<span class="sourceLineNo">546</span>    /**<a name="line.546"></a>
-<span class="sourceLineNo">547</span>     * Sets the collector motor to 0.<a name="line.547"></a>
-<span class="sourceLineNo">548</span>     */ <a name="line.548"></a>
-<span class="sourceLineNo">549</span>    public void collectorMStop() {<a name="line.549"></a>
-<span class="sourceLineNo">550</span>        CollectorMotor.set(0);<a name="line.550"></a>
-<span class="sourceLineNo">551</span>    }<a name="line.551"></a>
-<span class="sourceLineNo">552</span>}<a name="line.552"></a>
+<span class="sourceLineNo">455</span>    public double deadband(int axis, double deadband) {<a name="line.455"></a>
+<span class="sourceLineNo">456</span>        if (stick.getRawAxis(axis) &gt; -deadband &amp;&amp; stick.getRawAxis(axis) &lt; deadband) {<a name="line.456"></a>
+<span class="sourceLineNo">457</span>            return 0;<a name="line.457"></a>
+<span class="sourceLineNo">458</span>        } else {<a name="line.458"></a>
+<span class="sourceLineNo">459</span>            return -stick.getRawAxis(axis);<a name="line.459"></a>
+<span class="sourceLineNo">460</span>        }<a name="line.460"></a>
+<span class="sourceLineNo">461</span>    }<a name="line.461"></a>
+<span class="sourceLineNo">462</span>    <a name="line.462"></a>
+<span class="sourceLineNo">463</span>    public double CoOpdeadband(int axis, double deadband) {<a name="line.463"></a>
+<span class="sourceLineNo">464</span>        if (CoOpstick.getRawAxis(axis) &gt; -deadband &amp;&amp; CoOpstick.getRawAxis(axis) &lt; deadband) {<a name="line.464"></a>
+<span class="sourceLineNo">465</span>            return 0;<a name="line.465"></a>
+<span class="sourceLineNo">466</span>        } else {<a name="line.466"></a>
+<span class="sourceLineNo">467</span>            return -CoOpstick.getRawAxis(axis);<a name="line.467"></a>
+<span class="sourceLineNo">468</span>        }<a name="line.468"></a>
+<span class="sourceLineNo">469</span>    }<a name="line.469"></a>
+<span class="sourceLineNo">470</span><a name="line.470"></a>
+<span class="sourceLineNo">471</span>    /**<a name="line.471"></a>
+<span class="sourceLineNo">472</span>     * Sets the value for the rotator to forward.<a name="line.472"></a>
+<span class="sourceLineNo">473</span>     */<a name="line.473"></a>
+<span class="sourceLineNo">474</span>    public void rotateUp() {<a name="line.474"></a>
+<span class="sourceLineNo">475</span>        Rotator.set(DoubleSolenoid.Value.kReverse);<a name="line.475"></a>
+<span class="sourceLineNo">476</span>    }<a name="line.476"></a>
+<span class="sourceLineNo">477</span><a name="line.477"></a>
+<span class="sourceLineNo">478</span>    /**<a name="line.478"></a>
+<span class="sourceLineNo">479</span>     * Sets the value for the rotator to reverse.<a name="line.479"></a>
+<span class="sourceLineNo">480</span>     */<a name="line.480"></a>
+<span class="sourceLineNo">481</span>    public void rotateDown() {<a name="line.481"></a>
+<span class="sourceLineNo">482</span>        Rotator.set(DoubleSolenoid.Value.kForward);<a name="line.482"></a>
+<span class="sourceLineNo">483</span>    }<a name="line.483"></a>
+<span class="sourceLineNo">484</span><a name="line.484"></a>
+<span class="sourceLineNo">485</span>    /**<a name="line.485"></a>
+<span class="sourceLineNo">486</span>     * Sets the value for the jaws to reverse.<a name="line.486"></a>
+<span class="sourceLineNo">487</span>     */<a name="line.487"></a>
+<span class="sourceLineNo">488</span>    public void jawsClose() {<a name="line.488"></a>
+<span class="sourceLineNo">489</span>        Jaws.set(DoubleSolenoid.Value.kReverse);<a name="line.489"></a>
+<span class="sourceLineNo">490</span>    }<a name="line.490"></a>
+<span class="sourceLineNo">491</span><a name="line.491"></a>
+<span class="sourceLineNo">492</span>    /**<a name="line.492"></a>
+<span class="sourceLineNo">493</span>     * Sets the value for the jaws to forward.<a name="line.493"></a>
+<span class="sourceLineNo">494</span>     */<a name="line.494"></a>
+<span class="sourceLineNo">495</span>    public void jawsOpen() {<a name="line.495"></a>
+<span class="sourceLineNo">496</span>        Jaws.set(DoubleSolenoid.Value.kForward);<a name="line.496"></a>
+<span class="sourceLineNo">497</span>    }<a name="line.497"></a>
+<span class="sourceLineNo">498</span><a name="line.498"></a>
+<span class="sourceLineNo">499</span>    /**<a name="line.499"></a>
+<span class="sourceLineNo">500</span>     * Sets the value for the jaws to off.<a name="line.500"></a>
+<span class="sourceLineNo">501</span>     */<a name="line.501"></a>
+<span class="sourceLineNo">502</span>    public void jawsRelax() {<a name="line.502"></a>
+<span class="sourceLineNo">503</span>        Jaws.set(DoubleSolenoid.Value.kOff);<a name="line.503"></a>
+<span class="sourceLineNo">504</span>    }<a name="line.504"></a>
+<span class="sourceLineNo">505</span><a name="line.505"></a>
+<span class="sourceLineNo">506</span>    /**<a name="line.506"></a>
+<span class="sourceLineNo">507</span>     * Sets the collector motor to collect balls.<a name="line.507"></a>
+<span class="sourceLineNo">508</span>     */<a name="line.508"></a>
+<span class="sourceLineNo">509</span>    public void collectorMCollect() {<a name="line.509"></a>
+<span class="sourceLineNo">510</span>        CollectorMotor.set(1);<a name="line.510"></a>
+<span class="sourceLineNo">511</span>    }<a name="line.511"></a>
+<span class="sourceLineNo">512</span><a name="line.512"></a>
+<span class="sourceLineNo">513</span>    /**<a name="line.513"></a>
+<span class="sourceLineNo">514</span>     * Sets the collector motor to spit balls.<a name="line.514"></a>
+<span class="sourceLineNo">515</span>     */<a name="line.515"></a>
+<span class="sourceLineNo">516</span>    public void collectorMSpit() {<a name="line.516"></a>
+<span class="sourceLineNo">517</span>        CollectorMotor.set(-1);<a name="line.517"></a>
+<span class="sourceLineNo">518</span>    }<a name="line.518"></a>
+<span class="sourceLineNo">519</span><a name="line.519"></a>
+<span class="sourceLineNo">520</span>    /**<a name="line.520"></a>
+<span class="sourceLineNo">521</span>     * Sets the collector motor to 0.<a name="line.521"></a>
+<span class="sourceLineNo">522</span>     */<a name="line.522"></a>
+<span class="sourceLineNo">523</span>    public void collectorMStop() {<a name="line.523"></a>
+<span class="sourceLineNo">524</span>        CollectorMotor.set(0);<a name="line.524"></a>
+<span class="sourceLineNo">525</span>    }<a name="line.525"></a>
+<span class="sourceLineNo">526</span><a name="line.526"></a>
+<span class="sourceLineNo">527</span>    //<a name="line.527"></a>
+<span class="sourceLineNo">528</span>    //  control shooter<a name="line.528"></a>
+<span class="sourceLineNo">529</span>    //<a name="line.529"></a>
+<span class="sourceLineNo">530</span>// later, make this its own class<a name="line.530"></a>
+<span class="sourceLineNo">531</span>    <a name="line.531"></a>
+<span class="sourceLineNo">532</span>}<a name="line.532"></a>
 
 
 
